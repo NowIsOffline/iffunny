@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="帮助选择困难症患者做决定的工具，支持图片上传、随机选择、多语言切换等功能。">
+    <meta name="keywords" content="选择困难症,决策帮助,随机选择,图片选择器,choice-helper,decision maker,web-choice-helper">
+    <meta name="author" content="offline2048">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="选择困难症助手 | choice-helper">
+    <meta property="og:description" content="帮助选择困难症患者做决定的工具">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://iffunny.com/">
+    <link rel="canonical" href="https://iffunny.com/">
+    <title>choice-helper</title>
+    <link rel="stylesheet" href="styles.css">
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-W3FSQNE2JY"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-W3FSQNE2JY');
+</script>
+
+</head>
+<body>
+    <div class="container">
+        <header role="banner">
+            <h1 id="title">choice-helper</h1>
+            <p id="subtitle">帮助您轻松做出选择</p>
+            <div class="language-switcher" aria-label="语言切换">
+                <button id="lang-en" aria-pressed="false">English</button>
+				<button id="lang-zh" aria-pressed="true">中文</button>
+            </div>
+        </header>
+
+        <main role="main">
+            <section class="gallery-section" aria-labelledby="gallery-heading">
+                <h2 id="gallery-heading" class="visually-hidden">图片库</h2>
+                <div id="imageGallery" class="image-gallery" role="list"></div>
+                
+                <div class="compact-upload-area">
+                    <div class="upload-container">
+                        <div class="upload-area" id="uploadArea" tabindex="0" role="button" aria-label="点击或拖放图片到这里上传">
+                            <input type="file" id="fileInput" accept="image/*" multiple style="display: none;">
+                            <div id="uploadPrompt">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                                <span id="uploadText">添加图片</span>
+                            </div>
+                        </div>
+                        <button id="clearAllBtn" class="secondary-btn small-btn" disabled>
+                            <span id="clearAllText">清空</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="random-section" aria-labelledby="random-heading">
+                <h2 id="random-heading">Random Selection</h2>  <!-- 默认显示英文 -->
+                <div class="random-controls">
+                    <div class="input-group">
+                        <label for="randomCount" id="randomCountLabel">选择数量:</label>
+                        <input type="number" id="randomCount" min="1" value="1" placeholder="1" aria-labelledby="randomCountLabel">
+                    </div>
+                    <div class="toggle-group">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="skipAnimationToggle">
+                            <span class="toggle-slider"></span>
+                            <span id="skipAnimationText">跳过动画</span>
+                        </label>
+                    </div>
+                    <button id="randomBtn" class="primary-btn" disabled>
+                        <span id="randomBtnText">随机选择</span>
+                    </button>
+                    <button id="resetSelectionBtn" class="secondary-btn" disabled>
+                        <span id="resetSelectionText">重置选择</span>
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <footer role="contentinfo">
+            <p id="footerText">© 2025 选择困难症助手 - 帮助您轻松做出决定</p>
+        </footer>
+    </div>
+
+    <script src="scripts.js"></script>
+</body>
+</html>
