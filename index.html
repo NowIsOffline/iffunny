@@ -3,6 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="iFunny工具平台 - 提供choice-helper(选择困难症解决工具)等多种实用工具。iFunny tools platform offering choice-helper and various productivity utilities.">
+    <meta name="keywords" content="iFunny, choice-helper, 选择困难症, 工具平台, 在线工具, tools platform, online utilities, decision helper">
+	<!-- 在head中添加 -->
+<meta property="og:title" content="iFunny工具平台 | choice-helper等实用工具">
+<meta property="og:description" content="提供choice-helper(选择困难症解决工具)等多种实用工具">
+<meta property="og:image" content="https://iffunny.com/images/logo.png">
+<meta property="og:url" content="https://iffunny.com/">
+<meta name="twitter:card" content="summary_large_image">
+
     <title>Iffunny</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -372,6 +382,14 @@ canvas {
     }
 }
     </style>
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-W3FSQNE2JY"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-W3FSQNE2JY');
+</script>
 </head>
 <body>
         <div id="sky"></div>
@@ -434,7 +452,7 @@ canvas {
                     id: "home",
                     icon: "fa-home",
                     links: [
-						{ name: { zh: "选择困难症", en: "choice-helper" }, url: "https://iffunny.pages.dev/choice-helper/", icon: "https://www.google.com/favicon.ico" },
+						{ name: { zh: "选择困难症", en: "choice-helper" }, url: "https://iffunny.com/choice-helper/", icon: "https://www.google.com/favicon.ico" },
                         { name: { zh: "谷歌", en: "Google" }, url: "https://google.com", icon: "https://www.google.com/favicon.ico" },
                         { name: { zh: "GitHub", en: "GitHub" }, url: "https://github.com", icon: "https://github.com/favicon.ico" },
                         { name: { zh: "维基百科", en: "Wikipedia" }, url: "https://wikipedia.org", icon: "https://www.wikipedia.org/favicon.ico" }
@@ -512,13 +530,15 @@ canvas {
                     <div class="planet-card">
                         <h3 class="card-title">${langData.tool}</h3>
                         <div class="link-grid" id="linkGrid">
-                            ${page.links.map(link => `
-                                <a href="${link.url}" target="_blank" class="link-item">
-                                    <img src="${link.icon}" alt="${link.name[currentLang]}">
-                                    <span>${link.name[currentLang]}</span>
-                                </a>
-                            `).join('')}
-                        </div>
+    ${page.links.map(link => `
+        <a href="${link.url}" target="_blank" class="link-item" 
+           title="${link.name[currentLang]} - ${currentLang === 'zh' ? 'iFunny工具推荐' : 'iFunny Tool Recommendation'}">
+            <img src="${link.icon}" alt="${link.name[currentLang]} icon" loading="lazy">
+            <span>${link.name[currentLang]}</span>
+            <meta itemprop="name" content="${link.name[currentLang]}">
+        </a>
+    `).join('')}
+</div>
                     </div>
                 `;
             }
