@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Test your nerves in this intense Spy Identification Challenge! The tension rises as you progress through levels.">
+    <meta name="keywords" content="spy identification, tension game, stress test, HTML5 game, judgment game">
+    <meta name="author" content="Spy Challenge Games">
+    <meta property="og:title" content="Spy Identification: Tension Challenge">
+    <meta property="og:description" content="An intense game where tension rises as you identify teammates among spies">
+    <meta property="og:type" content="website">
+			<link rel="icon" type="image/png" sizes="32x32" href="../icon/small/protect/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../icon/small/protect/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../icon/small/protect/apple-touch-icon.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W3FSQNE2JY"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-W3FSQNE2JY');
+</script>
+
+    <title>Spy Identification: Tension Challenge | Test Your Nerves</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f8ff; /* Starting light blue */
+            color: #333;
+            line-height: 1.6;
+            transition: background-color 0.5s ease;
+        }
+        .game-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .character-container {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        .character {
+            width: 200px;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background-color: #e9f5ff;
+        }
+        .character:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        }
+        .character img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+            border: 3px solid #ccc;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: rgba(240, 240, 240, 0.8);
+            border-radius: 5px;
+        }
+        .stat {
+            font-weight: bold;
+        }
+        .health-bar {
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        .health-fill {
+            height: 100%;
+            background-color: #4CAF50;
+            width: 100%;
+            transition: width 0.3s;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .language-switch {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+        .language-switch button {
+            background-color: transparent;
+            color: #333;
+            border: 1px solid #333;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        .language-switch button.active {
+            background-color: #333;
+            color: white;
+        }
+        .game-over {
+            color: #d32f2f;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .result-message {
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .correct {
+            color: #4CAF50;
+        }
+        .wrong {
+            color: #d32f2f;
+        }
+        .rating {
+            font-size: 20px;
+            margin: 15px 0;
+            font-weight: bold;
+            color: #FF9800;
+        }
+    </style>
+</head>
+<body>
+    <div class="language-switch">
+        <button id="lang-en" class="active">English</button>
+        <button id="lang-zh">中文</button>
+    </div>
+
+    <div class="game-container">
+        <h1 id="game-title">Spy Identification: Tension Challenge</h1>
+        
+        <div class="stats">
+            <div class="stat">
+                <span id="health-label">Health:</span>
+                <div id="health-value">100%</div>
+                <div class="health-bar">
+                    <div class="health-fill" id="health-bar"></div>
+                </div>
+            </div>
+            <div class="stat">
+                <span id="level-label">Level:</span>
+                <div id="level-value">1</div>
+            </div>
+            <div class="stat">
+                <span id="rescued-label">Rescued:</span>
+                <div id="rescued-value">0</div>
+            </div>
+        </div>
+
+        <div id="game-area">
+            <p id="instruction">The tension rises! Choose your teammate among the suspects.</p>
+            
+            <div class="character-container" id="characters">
+                <!-- Characters will be added here by JavaScript -->
+            </div>
+        </div>
+
+        <div id="result-area" style="display: none;">
+            <div class="result-message" id="result-message"></div>
+            <button id="next-button">Continue</button>
+        </div>
+
+        <div id="game-over-area" style="display: none;">
+            <div class="game-over" id="game-over-message">Game Over!</div>
+            <div class="rating" id="rating-message"></div>
+            <p id="final-score"></p>
+            <button id="restart-button">Face the Tension Again</button>
+        </div>
+
+        <button id="how-to-play">How to Play</button>
+    </div>
+
+    <div class="modal" id="how-to-play-modal">
+        <div class="modal-content">
+            <h2 id="how-to-play-title">How to Play: Tension Challenge</h2>
+            <div id="how-to-play-content">
+                <p>This is a game of tension where you must identify teammates among spies.</p>
+                <ul>
+                    <li><strong>Each level presents 2 characters</strong> - one teammate, one spy</li>
+                    <li><strong>Correct choice (teammate):</strong> Full health restore + level up</li>
+                    <li><strong>Wrong choice (spy):</strong> Lose 50% of max health</li>
+                    <li><strong>Tension rises:</strong> The background intensifies as you progress, increasing the pressure!</li>
+                </ul>
+                <p>The game tests your judgment under pressure. How far can you go as the tension mounts?</p>
+            </div>
+            <button id="close-how-to-play">Got it!</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        const gameState = {
+            health: 100,
+            maxHealth: 100,
+            level: 1,
+            rescued: 0,
+            language: 'en',
+            gameOver: false
+        };
+
+        // Translations
+        const translations = {
+            en: {
+                title: "Spy Identification: Tension Challenge",
+                health: "Health:",
+                level: "Level:",
+                rescued: "Rescued:",
+                instruction: "The tension rises! Choose your teammate among the suspects.",
+                correct: "Correct! This is your teammate. Health restored!",
+                wrong: "Wrong! That was a spy. Lost 50% health!",
+                gameOver: "Game Over!",
+                finalScore: "The tension overwhelmed you after rescuing {rescued} teammates in {level} levels!",
+                ratings: [
+                    { threshold: 0, message: "The pressure was too much!" },
+                    { threshold: 3, message: "You handled the tension decently!" },
+                    { threshold: 5, message: "Good composure under pressure!" },
+                    { threshold: 8, message: "Impressive nerve control!" },
+                    { threshold: 12, message: "Steel nerves! You thrive under pressure!" },
+                    { threshold: 15, message: "Unshakable! The tension fuels you!" }
+                ],
+                next: "Continue",
+                restart: "Face the Tension Again",
+                howToPlay: "How to Play",
+                howToPlayTitle: "How to Play: Tension Challenge",
+                howToPlayContent: `
+                    <p>This is a game of tension where you must identify teammates among spies.</p>
+                    <ul>
+                        <li><strong>Each level presents 2 characters</strong> - one teammate, one spy</li>
+                        <li><strong>Correct choice (teammate):</strong> Full health restore + level up</li>
+                        <li><strong>Wrong choice (spy):</strong> Lose 50% of max health</li>
+                        <li><strong>Tension rises:</strong> The background intensifies as you progress, increasing the pressure!</li>
+                    </ul>
+                    <p>The game tests your judgment under pressure. How far can you go as the tension mounts?</p>
+                `,
+                gotIt: "Got it!"
+            },
+            zh: {
+                title: "间谍识别：紧张感挑战",
+                health: "血量:",
+                level: "关卡:",
+                rescued: "已接应:",
+                instruction: "紧张感上升了！从嫌疑人中选择你的队友。",
+                correct: "正确！这是你的队友。血量已恢复！",
+                wrong: "错误！那是间谍。损失50%血量！",
+                gameOver: "游戏结束！",
+                finalScore: "你在{level}关中接应了{rescued}名队友后终于被紧张感压垮了！",
+                ratings: [
+                    { threshold: 0, message: "压力太大了！" },
+                    { threshold: 3, message: "你应对紧张感的表现还不错！" },
+                    { threshold: 5, message: "在压力下保持了良好的判断力！" },
+                    { threshold: 8, message: "令人印象深刻的抗压能力！" },
+                    { threshold: 12, message: "钢铁般的神经！你在压力下反而更强大！" },
+                    { threshold: 15, message: "不可动摇！紧张感反而让你更专注！" }
+                ],
+                next: "继续",
+                restart: "再次挑战",
+                howToPlay: "玩法说明",
+                howToPlayTitle: "玩法说明：紧张感挑战",
+                howToPlayContent: `
+                    <p>这是一款考验你在压力下判断力的游戏，你需要从间谍中识别出队友。</p>
+                    <ul>
+                        <li><strong>每关会出现2个角色</strong> - 一个队友，一个间谍</li>
+                        <li><strong>正确选择(队友):</strong> 完全恢复血量并进入下一关</li>
+                        <li><strong>错误选择(间谍):</strong> 损失50%最大血量</li>
+                        <li><strong>紧张感上升:</strong> 随着关卡推进，背景会变得越来越紧张！</li>
+                    </ul>
+                    <p>游戏考验你在压力下的判断力。随着紧张感上升，你能坚持多久？</p>
+                `,
+                gotIt: "明白了！"
+            }
+        };
+
+        // Character pool (using placeholder image URLs)
+        const characters = [
+            { id: 1, name: "Alex", image: "https://randomuser.me/api/portraits/men/1.jpg" },
+            { id: 2, name: "Jamie", image: "https://randomuser.me/api/portraits/women/2.jpg" },
+            { id: 3, name: "Taylor", image: "https://randomuser.me/api/portraits/men/3.jpg" },
+            { id: 4, name: "Morgan", image: "https://randomuser.me/api/portraits/women/4.jpg" },
+            { id: 5, name: "Casey", image: "https://randomuser.me/api/portraits/men/5.jpg" },
+            { id: 6, name: "Riley", image: "https://randomuser.me/api/portraits/women/6.jpg" },
+            { id: 7, name: "Jordan", image: "https://randomuser.me/api/portraits/men/7.jpg" },
+            { id: 8, name: "Quinn", image: "https://randomuser.me/api/portraits/women/8.jpg" },
+            { id: 9, name: "Drew", image: "https://randomuser.me/api/portraits/men/9.jpg" },
+            { id: 10, name: "Skyler", image: "https://randomuser.me/api/portraits/women/10.jpg" }
+        ];
+
+        // DOM elements
+        const elements = {
+            gameTitle: document.getElementById('game-title'),
+            healthLabel: document.getElementById('health-label'),
+            healthValue: document.getElementById('health-value'),
+            healthBar: document.getElementById('health-bar'),
+            levelLabel: document.getElementById('level-label'),
+            levelValue: document.getElementById('level-value'),
+            rescuedLabel: document.getElementById('rescued-label'),
+            rescuedValue: document.getElementById('rescued-value'),
+            instruction: document.getElementById('instruction'),
+            charactersContainer: document.getElementById('characters'),
+            resultArea: document.getElementById('result-area'),
+            resultMessage: document.getElementById('result-message'),
+            nextButton: document.getElementById('next-button'),
+            gameOverArea: document.getElementById('game-over-area'),
+            gameOverMessage: document.getElementById('game-over-message'),
+            ratingMessage: document.getElementById('rating-message'),
+            finalScore: document.getElementById('final-score'),
+            restartButton: document.getElementById('restart-button'),
+            howToPlayButton: document.getElementById('how-to-play'),
+            howToPlayModal: document.getElementById('how-to-play-modal'),
+            howToPlayTitle: document.getElementById('how-to-play-title'),
+            howToPlayContent: document.getElementById('how-to-play-content'),
+            closeHowToPlay: document.getElementById('close-how-to-play'),
+            langEn: document.getElementById('lang-en'),
+            langZh: document.getElementById('lang-zh')
+        };
+
+        // Initialize the game
+        function initGame() {
+            updateUI();
+            generateLevel();
+            setupEventListeners();
+            updateBackgroundTension();
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Language switchers
+            elements.langEn.addEventListener('click', () => switchLanguage('en'));
+            elements.langZh.addEventListener('click', () => switchLanguage('zh'));
+            
+            // How to play button
+            elements.howToPlayButton.addEventListener('click', () => {
+                elements.howToPlayModal.style.display = 'flex';
+            });
+            
+            // Close how to play modal
+            elements.closeHowToPlay.addEventListener('click', () => {
+                elements.howToPlayModal.style.display = 'none';
+            });
+            
+            // Next button
+            elements.nextButton.addEventListener('click', nextLevel);
+            
+            // Restart button
+            elements.restartButton.addEventListener('click', restartGame);
+        }
+
+        // Switch language
+        function switchLanguage(lang) {
+            gameState.language = lang;
+            
+            // Update language buttons
+            elements.langEn.classList.toggle('active', lang === 'en');
+            elements.langZh.classList.toggle('active', lang === 'zh');
+            
+            updateUI();
+        }
+
+        // Update UI based on current language
+        function updateUI() {
+            const t = translations[gameState.language];
+            
+            // Update text elements
+            elements.gameTitle.textContent = t.title;
+            elements.healthLabel.textContent = t.health;
+            elements.levelLabel.textContent = t.level;
+            elements.rescuedLabel.textContent = t.rescued;
+            elements.instruction.textContent = t.instruction;
+            elements.howToPlayButton.textContent = t.howToPlay;
+            elements.howToPlayTitle.textContent = t.howToPlayTitle;
+            elements.howToPlayContent.innerHTML = t.howToPlayContent;
+            elements.closeHowToPlay.textContent = t.gotIt;
+            elements.nextButton.textContent = t.next;
+            elements.restartButton.textContent = t.restart;
+            elements.gameOverMessage.textContent = t.gameOver;
+            
+            // Update health display
+            updateHealthDisplay();
+            
+            // Update level and rescued counts
+            elements.levelValue.textContent = gameState.level;
+            elements.rescuedValue.textContent = gameState.rescued;
+        }
+
+        // Update background based on level (tension)
+        function updateBackgroundTension() {
+            const tensionLevel = Math.min(gameState.level / 20, 1); // Cap at 1 (100%)
+            const startColor = [240, 248, 255]; // Light blue
+            const endColor = [139, 0, 0]; // Dark red
+            
+            // Interpolate between start and end colors based on tension
+            const currentColor = startColor.map((channel, index) => {
+                return Math.round(channel + (endColor[index] - channel) * tensionLevel);
+            });
+            
+            document.body.style.backgroundColor = `rgb(${currentColor.join(',')})`;
+        }
+
+        // Update health display
+        function updateHealthDisplay() {
+            const healthPercentage = Math.max(0, (gameState.health / gameState.maxHealth) * 100);
+            elements.healthValue.textContent = `${Math.round(healthPercentage)}%`;
+            elements.healthBar.style.width = `${healthPercentage}%`;
+            
+            // Change color based on health level
+            if (healthPercentage > 60) {
+                elements.healthBar.style.backgroundColor = '#4CAF50'; // Green
+            } else if (healthPercentage > 30) {
+                elements.healthBar.style.backgroundColor = '#FFC107'; // Yellow
+            } else {
+                elements.healthBar.style.backgroundColor = '#F44336'; // Red
+            }
+        }
+
+        // Generate a new level
+        function generateLevel() {
+            // Clear previous characters
+            elements.charactersContainer.innerHTML = '';
+            
+            // Shuffle characters and pick two
+            const shuffled = [...characters].sort(() => 0.5 - Math.random());
+            const selectedCharacters = shuffled.slice(0, 2);
+            
+            // Randomly decide which one is the teammate (index 0 or 1)
+            const teammateIndex = Math.floor(Math.random() * 2);
+            
+            // Create character elements
+            selectedCharacters.forEach((character, index) => {
+                const characterElement = document.createElement('div');
+                characterElement.className = 'character';
+                characterElement.dataset.id = character.id;
+                characterElement.dataset.isTeammate = index === teammateIndex;
+                
+                characterElement.innerHTML = `
+                    <img src="${character.image}" alt="${character.name}">
+                    <h3>${character.name}</h3>
+                `;
+                
+                characterElement.addEventListener('click', () => selectCharacter(characterElement));
+                elements.charactersContainer.appendChild(characterElement);
+            });
+        }
+
+        // Handle character selection
+        function selectCharacter(element) {
+            if (gameState.gameOver) return;
+            
+            const isTeammate = element.dataset.isTeammate === 'true';
+            const t = translations[gameState.language];
+            
+            if (isTeammate) {
+                // Correct choice - teammate
+                gameState.health = gameState.maxHealth;
+                gameState.rescued++;
+                elements.resultMessage.textContent = t.correct;
+                elements.resultMessage.className = 'result-message correct';
+            } else {
+                // Wrong choice - spy
+                gameState.health -= Math.floor(gameState.maxHealth / 2);
+                elements.resultMessage.textContent = t.wrong;
+                elements.resultMessage.className = 'result-message wrong';
+                
+                // Check if game over
+                if (gameState.health <= 0) {
+                    gameState.health = 0;
+                    gameOver();
+                    return;
+                }
+            }
+            
+            // Show result
+            document.getElementById('game-area').style.display = 'none';
+            elements.resultArea.style.display = 'block';
+            
+            // Update UI
+            updateUI();
+        }
+
+        // Proceed to next level
+        function nextLevel() {
+            if (gameState.gameOver) return;
+            
+            gameState.level++;
+            
+            // Hide result and show game area
+            elements.resultArea.style.display = 'none';
+            document.getElementById('game-area').style.display = 'block';
+            
+            // Generate new level
+            generateLevel();
+            
+            // Update UI and tension
+            updateUI();
+            updateBackgroundTension();
+        }
+
+        // Get rating based on level
+        function getRating(level) {
+            const t = translations[gameState.language];
+            let selectedRating = t.ratings[0];
+            
+            // Find the highest threshold the player has achieved
+            for (let i = t.ratings.length - 1; i >= 0; i--) {
+                if (level >= t.ratings[i].threshold) {
+                    selectedRating = t.ratings[i];
+                    break;
+                }
+            }
+            
+            return selectedRating.message;
+        }
+
+        // Game over
+        function gameOver() {
+            gameState.gameOver = true;
+            elements.resultArea.style.display = 'none';
+            
+            // Show final score and rating
+            const t = translations[gameState.language];
+            elements.finalScore.textContent = t.finalScore
+                .replace('{rescued}', gameState.rescued)
+                .replace('{level}', gameState.level);
+            
+            elements.ratingMessage.textContent = getRating(gameState.level);
+            
+            elements.gameOverArea.style.display = 'block';
+        }
+
+        // Restart game
+        function restartGame() {
+            gameState.health = 100;
+            gameState.maxHealth = 100;
+            gameState.level = 1;
+            gameState.rescued = 0;
+            gameState.gameOver = false;
+            
+            elements.gameOverArea.style.display = 'none';
+            document.getElementById('game-area').style.display = 'block';
+            
+            generateLevel();
+            updateUI();
+            updateBackgroundTension();
+        }
+
+        // Initialize the game when the page loads
+        window.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
