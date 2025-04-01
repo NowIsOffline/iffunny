@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TXT reader,智能TXT小说阅读器，自动分章，整章阅读，目录导航，多种配色方案，本地阅读不上传">
+    <meta name="keywords" content="TXT阅读器,小说阅读器,自动分章,目录导航,中文阅读器,护眼模式">
+			<link rel="icon" type="image/png" sizes="32x32" href="../icon/small/education/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../icon/small/education/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../icon/small/education/apple-touch-icon.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W3FSQNE2JY"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-W3FSQNE2JY');
+</script>
+    <title>TXT reader|智能TXT小说阅读器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", "SimSun", sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 15px;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+        h1 {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin: 10px 0;
+            color: #2c3e50;
+            transition: color 0.3s;
+        }
+        .file-upload {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 5px;
+            padding: 10px;
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            transition: all 0.3s;
+            height: 60px;
+            overflow: hidden;
+        }
+        .file-upload.collapsed {
+            padding: 5px;
+            margin-bottom: 5px;
+        }
+        .file-upload:hover {
+            height: auto;
+            border-color: #3498db;
+        }
+        .file-input {
+            display: none;
+        }
+        .upload-btn {
+            background-color: #3498db;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 8px;
+            transition: background-color 0.3s;
+        }
+        .upload-btn:hover {
+            background-color: #2980b9;
+        }
+        .file-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        .file-name {
+            margin-top: 5px;
+            font-size: 13px;
+            color: #666;
+            text-align: center;
+            word-break: break-all;
+            transition: color 0.3s;
+        }
+        .encoding-selector {
+            margin-top: 8px;
+            width: 100%;
+            max-width: 280px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .file-upload:hover .encoding-selector {
+            opacity: 1;
+        }
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 180px);
+        }
+        .chapter-list {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            padding: 8px;
+            background-color: #fafafa;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .chapter-item {
+            padding: 6px 8px;
+            margin-bottom: 4px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .chapter-item:hover {
+            background-color: #e6f2ff;
+        }
+        .chapter-item.current {
+            background-color: #d4e6ff;
+            font-weight: bold;
+        }
+        .reader-container {
+            display: none;
+            flex-direction: column;
+            height: calc(100vh - 180px);
+        }
+        .reader-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            align-items: center;
+            transition: background-color 0.3s;
+        }
+        .progress-info {
+            font-size: 13px;
+            color: #666;
+            transition: color 0.3s;
+        }
+        .control-btn {
+            background-color: #3498db;
+            color: white;
+            padding: 4px 12px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background-color 0.3s;
+        }
+        .control-btn:hover {
+            background-color: #2980b9;
+        }
+        .control-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .reader-content {
+            padding: 15px;
+            line-height: 1.8;
+            font-size: 18px;
+            background-color: #fff;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            flex: 1;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+        .settings {
+            margin-top: 10px;
+            padding: 5px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            grid-column: 1 / -1;
+            transition: background-color 0.3s;
+            height: 40px;
+            overflow: hidden;
+        }
+        .settings:hover {
+            height: auto;
+            padding: 15px;
+        }
+        .setting-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .settings:hover .setting-row {
+            opacity: 1;
+        }
+        .setting-group {
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 3px;
+            font-weight: bold;
+            font-size: 13px;
+            transition: color 0.3s;
+        }
+        select {
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 200px;
+            font-size: 13px;
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+        }
+        .theme-selector {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .theme-option {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+        }
+        .theme-option:hover {
+            transform: scale(1.1);
+        }
+        .theme-option.selected {
+            border-color: #333;
+            transform: scale(1.1);
+        }
+        .settings-title {
+            text-align: center;
+            margin: 5px 0;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            color: #777;
+            font-size: 12px;
+            grid-column: 1 / -1;
+            transition: color 0.3s, border-color 0.3s;
+        }
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .sidebar, .reader-container {
+                height: auto;
+                max-height: 300px;
+            }
+            .reader-content {
+                font-size: 16px;
+                padding: 10px;
+            }
+            .chapter-list {
+                max-height: 200px;
+                margin-bottom: 15px;
+            }
+        }
+
+        /* 主题样式 */
+        .theme-default {
+            --bg-color: #fff;
+            --text-color: #333;
+            --container-bg: #fff;
+            --sidebar-bg: #fafafa;
+            --reader-bg: #fff;
+            --reader-text: #333;
+            --control-bg: #f0f0f0;
+            --hover-bg: #e6f2ff;
+            --current-bg: #d4e6ff;
+        }
+        .theme-dark {
+            --bg-color: #222;
+            --text-color: #eee;
+            --container-bg: #333;
+            --sidebar-bg: #444;
+            --reader-bg: #333;
+            --reader-text: #eee;
+            --control-bg: #444;
+            --hover-bg: #555;
+            --current-bg: #666;
+        }
+        .theme-sepia {
+            --bg-color: #f4ecd8;
+            --text-color: #5b4636;
+            --container-bg: #f8f1e0;
+            --sidebar-bg: #f0e6d2;
+            --reader-bg: #f8f1e0;
+            --reader-text: #5b4636;
+            --control-bg: #e6d9c5;
+            --hover-bg: #e0d4b8;
+            --current-bg: #d8c9a8;
+        }
+        .theme-green {
+            --bg-color: #e8f5e9;
+            --text-color: #2e7d32;
+            --container-bg: #f1f8e9;
+            --sidebar-bg: #e0f2e1;
+            --reader-bg: #f1f8e9;
+            --reader-text: #1b5e20;
+            --control-bg: #dcedc8;
+            --hover-bg: #c8e6c9;
+            --current-bg: #a5d6a7;
+        }
+        .theme-blue {
+            --bg-color: #e3f2fd;
+            --text-color: #0d47a1;
+            --container-bg: #e8eaf6;
+            --sidebar-bg: #d9ddf1;
+            --reader-bg: #e8eaf6;
+            --reader-text: #1a237e;
+            --control-bg: #c5cae9;
+            --hover-bg: #b3c1f1;
+            --current-bg: #9fa8da;
+        }
+		 .language-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .lang-btn {
+            background: none;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            padding: 2px 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        .lang-btn.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+    </style>
+</head>
+<body class="theme-default">
+   <div class="language-switcher">
+        <button class="lang-btn active" data-lang="en">English</button>
+        <button class="lang-btn" data-lang="zh">中文</button>
+    </div>
+
+    <div class="container">
+        <h1 data-i18n="title">智能TXT小说阅读器</h1>
+        
+        <div class="file-upload collapsed" id="fileUpload">
+            <input type="file" id="fileInput" class="file-input" accept=".txt">
+            <button class="upload-btn" onclick="document.getElementById('fileInput').click()" data-i18n="selectFile">选择TXT小说文件</button>
+            <div class="file-info">
+                <div id="fileName" class="file-name" data-i18n="noFileSelected">未选择文件</div>
+                <div class="encoding-selector">
+                    <label for="encoding" data-i18n="fileEncoding">文件编码:</label>
+                    <select id="encoding">
+                        <option value="auto" data-i18n="autoDetect">自动检测</option>
+                        <option value="UTF-8">UTF-8</option>
+                        <option value="GBK">GBK</option>
+                        <option value="GB18030">GB18030</option>
+                        <option value="Big5" data-i18n="traditionalChinese">Big5 (繁体)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sidebar">
+            <h3 data-i18n="chapterList">章节目录</h3>
+            <div class="chapter-list" id="chapterList">
+                <div class="chapter-item" data-i18n="selectFileFirst">请先选择小说文件</div>
+            </div>
+            <div class="progress-info" id="progressInfo" data-i18n="progress">进度: 0%</div>
+        </div>
+        
+        <div class="reader-container" id="readerContainer">
+            <div class="reader-controls">
+                <button class="control-btn" id="prevChapter" data-i18n="prevChapter">上一章</button>
+                <span id="chapterInfo">第1章</span>
+                <button class="control-btn" id="nextChapter" data-i18n="nextChapter">下一章</button>
+            </div>
+            <div class="reader-content" id="readerContent" data-i18n="contentPlaceholder">
+                内容将在这里显示...
+            </div>
+        </div>
+        
+        <div class="settings">
+            <div class="settings-title" data-i18n="readingSettings">阅读设置 (鼠标悬停展开)</div>
+            <div class="setting-row">
+                <div class="setting-group">
+                    <label for="fontSize" data-i18n="fontSize">字体大小</label>
+                    <select id="fontSize">
+                        <option value="14px" data-i18n="small">小</option>
+                        <option value="16px" selected data-i18n="medium">中</option>
+                        <option value="18px" data-i18n="large">大</option>
+                        <option value="20px" data-i18n="xlarge">特大</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label for="lineHeight" data-i18n="lineHeight">行间距</label>
+                    <select id="lineHeight">
+                        <option value="1.4" data-i18n="tight">紧凑</option>
+                        <option value="1.6" selected data-i18n="normal">适中</option>
+                        <option value="1.8" data-i18n="loose">宽松</option>
+                        <option value="2.0" data-i18n="xloose">很宽松</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label data-i18n="themeColor">主题颜色</label>
+                    <div class="theme-selector">
+                        <div class="theme-option selected" data-theme="default" style="background: #fff; border: 1px solid #ccc;" title="默认" data-i18n="default"></div>
+                        <div class="theme-option" data-theme="dark" style="background: #333;" title="暗黑模式" data-i18n="darkMode"></div>
+                        <div class="theme-option" data-theme="sepia" style="background: #f4ecd8;" title="护眼模式" data-i18n="eyeProtection"></div>
+                        <div class="theme-option" data-theme="green" style="background: #e8f5e9;" title="绿意盎然" data-i18n="greenTheme"></div>
+                        <div class="theme-option" data-theme="blue" style="background: #e3f2fd;" title="蓝色海洋" data-i18n="blueTheme"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2025 <span data-i18n="appName">智能TXT阅读器</span> - <span data-i18n="featureDesc">中英文双语版</span></p>
+            <p data-i18n="privacyNotice">所有内容均在本地处理，保护您的隐私</p>
+        </div>
+    </div>
+
+    <script>
+	 // 多语言资源
+        const i18nResources = {
+            zh: {
+                title: "智能TXT小说阅读器",
+                selectFile: "选择TXT小说文件",
+                noFileSelected: "未选择文件",
+                fileEncoding: "文件编码:",
+                autoDetect: "自动检测",
+                traditionalChinese: "Big5 (繁体)",
+                chapterList: "章节目录",
+                selectFileFirst: "请先选择小说文件",
+                progress: "进度: ",
+                prevChapter: "上一章",
+                nextChapter: "下一章",
+                contentPlaceholder: "内容将在这里显示...",
+                readingSettings: "阅读设置 (鼠标悬停展开)",
+                fontSize: "字体大小",
+                small: "小",
+                medium: "中",
+                large: "大",
+                xlarge: "特大",
+                lineHeight: "行间距",
+                tight: "紧凑",
+                normal: "适中",
+                loose: "宽松",
+                xloose: "很宽松",
+                themeColor: "主题颜色",
+                default: "默认",
+                darkMode: "暗黑模式",
+                eyeProtection: "护眼模式",
+                greenTheme: "绿意盎然",
+                blueTheme: "蓝色海洋",
+                appName: "智能TXT阅读器",
+                featureDesc: "中英文双语版",
+                privacyNotice: "所有内容均在本地处理，保护您的隐私",
+                preface: "序章",
+                fullText: "全文"
+            },
+            en: {
+                title: "Smart TXT Novel Reader",
+                selectFile: "Select TXT File",
+                noFileSelected: "No file selected",
+                fileEncoding: "File Encoding:",
+                autoDetect: "Auto Detect",
+                traditionalChinese: "Big5 (Traditional)",
+                chapterList: "Chapters",
+                selectFileFirst: "Please select a file first",
+                progress: "Progress: ",
+                prevChapter: "Previous",
+                nextChapter: "Next",
+                contentPlaceholder: "Content will be displayed here...",
+                readingSettings: "Reading Settings (Hover to expand)",
+                fontSize: "Font Size",
+                small: "Small",
+                medium: "Medium",
+                large: "Large",
+                xlarge: "X-Large",
+                lineHeight: "Line Height",
+                tight: "Tight",
+                normal: "Normal",
+                loose: "Loose",
+                xloose: "X-Loose",
+                themeColor: "Theme Color",
+                default: "Default",
+                darkMode: "Dark Mode",
+                eyeProtection: "Eye Protection",
+                greenTheme: "Green Theme",
+                blueTheme: "Blue Theme",
+                appName: "Smart TXT Reader",
+                featureDesc: "Bilingual Version",
+                privacyNotice: "All content processed locally, protecting your privacy",
+                preface: "Preface",
+                fullText: "Full Text"
+            }
+        };
+
+        // 全局变量
+        let fileContent = '';
+        let chapters = [];
+        let currentChapter = 0;
+        let currentLanguage = 'en';
+
+        
+         // DOM元素
+        const fileInput = document.getElementById('fileInput');
+        const fileUpload = document.getElementById('fileUpload');
+        const fileName = document.getElementById('fileName');
+        const encodingSelect = document.getElementById('encoding');
+        const chapterList = document.getElementById('chapterList');
+        const progressInfo = document.getElementById('progressInfo');
+        const readerContainer = document.getElementById('readerContainer');
+        const readerContent = document.getElementById('readerContent');
+        const chapterInfo = document.getElementById('chapterInfo');
+        const prevChapterBtn = document.getElementById('prevChapter');
+        const nextChapterBtn = document.getElementById('nextChapter');
+        const fontSizeSelect = document.getElementById('fontSize');
+        const lineHeightSelect = document.getElementById('lineHeight');
+        const themeOptions = document.querySelectorAll('.theme-option');
+        const langButtons = document.querySelectorAll('.lang-btn');
+        
+        // 事件监听
+        fileInput.addEventListener('change', handleFileSelect);
+        prevChapterBtn.addEventListener('click', goToPrevChapter);
+        nextChapterBtn.addEventListener('click', goToNextChapter);
+        fontSizeSelect.addEventListener('change', updateStyles);
+        lineHeightSelect.addEventListener('change', updateStyles);
+        themeOptions.forEach(option => {
+            option.addEventListener('click', changeTheme);
+        });
+        langButtons.forEach(btn => {
+            btn.addEventListener('click', switchLanguage);
+        });
+        
+        // 初始化
+        updateStyles();
+        applyTheme('default');
+		
+		// 切换语言
+        function switchLanguage(e) {
+            const lang = e.target.dataset.lang;
+            if (lang === currentLanguage) return;
+            
+            currentLanguage = lang;
+            
+            // 更新按钮状态
+            langButtons.forEach(btn => {
+                if (btn.dataset.lang === lang) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // 更新界面文本
+            updateUIText();
+            
+            // 更新章节标题（如果有内容）
+            if (chapters.length > 0) {
+                updateChapterTitles();
+                updateReader();
+            }
+        }
+        
+        // 更新界面文本
+        function updateUIText() {
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.dataset.i18n;
+                if (i18nResources[currentLanguage][key]) {
+                    if (element.tagName === 'INPUT' || element.tagName === 'SELECT') {
+                        // 对于option元素，需要在父select中处理
+                        if (element.parentNode.tagName === 'SELECT') {
+                            // 已经在select的change事件中处理
+                        } else {
+                            element.value = i18nResources[currentLanguage][key];
+                        }
+                    } else {
+                        element.textContent = i18nResources[currentLanguage][key];
+                    }
+                }
+            });
+            
+            // 特殊处理select选项
+            const selectOptions = {
+                'fontSize': ['small', 'medium', 'large', 'xlarge'],
+                'lineHeight': ['tight', 'normal', 'loose', 'xloose'],
+                'encoding': ['autoDetect', 'traditionalChinese']
+            };
+            
+            for (const selectId in selectOptions) {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    Array.from(select.options).forEach((option, index) => {
+                        const key = selectOptions[selectId][index];
+                        if (key && i18nResources[currentLanguage][key]) {
+                            option.textContent = i18nResources[currentLanguage][key];
+                        }
+                    });
+                }
+            }
+            
+            // 更新主题提示
+            document.querySelectorAll('.theme-option').forEach(option => {
+                const key = option.dataset.i18n;
+                if (key && i18nResources[currentLanguage][key]) {
+                    option.title = i18nResources[currentLanguage][key];
+                }
+            });
+        }
+		
+		 // 更新章节标题
+        function updateChapterTitles() {
+            // 第一章之前的序章
+            if (chapters.length > 0 && chapters[0].title === "序章") {
+                chapters[0].title = i18nResources[currentLanguage]['preface'];
+            }
+            
+            // 全文情况
+            if (chapters.length === 1 && chapters[0].title === "全文") {
+                chapters[0].title = i18nResources[currentLanguage]['fullText'];
+            }
+            
+            updateChapterList();
+        }
+        
+        // 处理文件选择
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            fileName.textContent = `已选择: ${file.name}`;
+            fileUpload.classList.add('collapsed');
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const encoding = encodingSelect.value;
+                const buffer = e.target.result;
+                
+                if (encoding === 'auto') {
+                    detectEncoding(buffer, function(detectedEncoding) {
+                        displayContent(buffer, detectedEncoding);
+                    });
+                } else {
+                    displayContent(buffer, encoding);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        
+        // 检测文件编码
+        function detectEncoding(buffer, callback) {
+            const arr = new Uint8Array(buffer);
+            let encoding = 'UTF-8'; // 默认使用UTF-8
+            
+            // 简单的BOM检测
+            if (arr.length >= 3 && arr[0] === 0xEF && arr[1] === 0xBB && arr[2] === 0xBF) {
+                callback('UTF-8');
+                return;
+            }
+            
+            // 尝试UTF-8解码
+            try {
+                const decoder = new TextDecoder('UTF-8', {fatal: true});
+                decoder.decode(arr.slice(0, 1024)); // 只检查前1024字节
+                callback('UTF-8');
+                return;
+            } catch (e) {}
+            
+            // 尝试常见中文编码
+            const chineseEncodings = ['GBK', 'GB18030', 'Big5'];
+            for (let enc of chineseEncodings) {
+                try {
+                    const decoder = new TextDecoder(enc, {fatal: true});
+                    decoder.decode(arr.slice(0, 1024));
+                    callback(enc);
+                    return;
+                } catch (e) {}
+            }
+            
+            // 如果都失败，使用GB18030(兼容性最好)
+            callback('GB18030');
+        }
+        
+        // 显示内容
+        function displayContent(buffer, encoding) {
+            try {
+                const decoder = new TextDecoder(encoding);
+                fileContent = decoder.decode(new Uint8Array(buffer));
+                
+                // 处理换行符
+                fileContent = fileContent.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+                
+                // 解析章节
+                parseChapters();
+                
+                // 更新编码选择器显示实际使用的编码
+                encodingSelect.value = encoding;
+                
+                // 显示阅读器
+                readerContainer.style.display = 'flex';
+                
+                // 初始化阅读位置
+                currentChapter = 0;
+                updateReader();
+            } catch (e) {
+                alert(`解码失败: ${e.message}`);
+                console.error(e);
+            }
+        }
+        
+        // 解析章节 - 改进版
+        function parseChapters() {
+            chapters = [];
+            
+            // 改进的章节识别正则表达式
+            const regex = /(^|\n)([第][0-9零一二三四五六七八九十百千]+[章卷][^\n]*)\n/g;
+            
+            let lastIndex = 0;
+            let firstChapterIndex = -1;
+            
+            // 查找所有章节
+            let match;
+            while ((match = regex.exec(fileContent)) !== null) {
+                const title = match[2].trim();
+                const start = match.index + match[0].length;
+                
+                if (firstChapterIndex === -1) {
+                    firstChapterIndex = match.index;
+                }
+                
+                // 添加前一章节
+                if (chapters.length > 0) {
+                    chapters[chapters.length - 1].end = match.index;
+                    chapters[chapters.length - 1].content = fileContent.substring(
+                        chapters[chapters.length - 1].start, 
+                        chapters[chapters.length - 1].end
+                    );
+                } else if (match.index > 0) {
+                    // 添加第一章之前的内容作为序章
+                    chapters.push({
+                        title: "序章",
+                        start: 0,
+                        end: match.index,
+                        content: fileContent.substring(0, match.index)
+                    });
+                }
+                
+                // 添加新章节
+                chapters.push({
+                    title: title,
+                    start: start,
+                    end: fileContent.length,
+                    content: ""
+                });
+            }
+            
+            // 处理没有找到章节的情况
+            if (chapters.length === 0) {
+                chapters.push({
+                    title: "全文",
+                    start: 0,
+                    end: fileContent.length,
+                    content: fileContent
+                });
+            } else {
+                // 更新最后一章的内容
+                chapters[chapters.length - 1].end = fileContent.length;
+                chapters[chapters.length - 1].content = fileContent.substring(
+                    chapters[chapters.length - 1].start,
+                    chapters[chapters.length - 1].end
+                );
+            }
+            
+            // 更新目录
+            updateChapterList();
+        }
+        
+        // 更新目录列表
+        function updateChapterList() {
+            chapterList.innerHTML = '';
+            chapters.forEach((chapter, index) => {
+                const chapterItem = document.createElement('div');
+                chapterItem.className = 'chapter-item';
+                if (index === currentChapter) {
+                    chapterItem.classList.add('current');
+                }
+                chapterItem.textContent = chapter.title;
+                chapterItem.addEventListener('click', () => {
+                    goToChapter(index);
+                });
+                chapterList.appendChild(chapterItem);
+            });
+        }
+        
+        // 更新阅读器内容
+        function updateReader() {
+            if (chapters.length === 0) return;
+            
+            const chapter = chapters[currentChapter];
+            readerContent.textContent = chapter.content;
+            
+            // 更新章节信息
+            chapterInfo.textContent = chapter.title;
+            
+            // 更新按钮状态
+            prevChapterBtn.disabled = currentChapter <= 0;
+            nextChapterBtn.disabled = currentChapter >= chapters.length - 1;
+            
+            // 更新目录当前章节高亮
+            const chapterItems = document.querySelectorAll('.chapter-item');
+            chapterItems.forEach((item, index) => {
+                if (index === currentChapter) {
+                    item.classList.add('current');
+                } else {
+                    item.classList.remove('current');
+                }
+            });
+            
+            // 更新进度信息
+            updateProgress();
+            
+            // 滚动到当前章节
+            const currentItem = chapterItems[currentChapter];
+            if (currentItem) {
+                currentItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            
+            // 滚动到内容顶部
+            readerContent.scrollTop = 0;
+        }
+        
+        // 更新阅读进度
+        function updateProgress() {
+            if (chapters.length === 0) return;
+            
+            // 计算已读字符数
+            let readChars = 0;
+            for (let i = 0; i < currentChapter; i++) {
+                readChars += chapters[i].content.length;
+            }
+            
+            // 计算总字符数
+            const totalChars = fileContent.length;
+            
+            // 计算百分比
+            const percent = Math.round((readChars / totalChars) * 100);
+            progressInfo.textContent = `进度: ${percent}%`;
+        }
+        
+        // 跳转到指定章节
+        function goToChapter(index) {
+            if (index >= 0 && index < chapters.length) {
+                currentChapter = index;
+                updateReader();
+            }
+        }
+        
+        // 上一章
+        function goToPrevChapter() {
+            if (currentChapter > 0) {
+                currentChapter--;
+                updateReader();
+            }
+        }
+        
+        // 下一章
+        function goToNextChapter() {
+            if (currentChapter < chapters.length - 1) {
+                currentChapter++;
+                updateReader();
+            }
+        }
+        
+        // 更新样式
+        function updateStyles() {
+            readerContent.style.fontSize = fontSizeSelect.value;
+            readerContent.style.lineHeight = lineHeightSelect.value;
+        }
+        
+        // 切换主题
+        function changeTheme(e) {
+            const theme = e.target.dataset.theme;
+            applyTheme(theme);
+            
+            // 更新主题选择状态
+            themeOptions.forEach(option => {
+                if (option === e.target) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+            });
+        }
+        
+        // 应用主题
+        function applyTheme(theme) {
+            document.body.className = `theme-${theme}`;
+            
+            // 更新CSS变量
+            const root = document.documentElement;
+            const themeStyles = getComputedStyle(document.body);
+            
+            root.style.setProperty('--bg-color', themeStyles.getPropertyValue('--bg-color'));
+            root.style.setProperty('--text-color', themeStyles.getPropertyValue('--text-color'));
+            root.style.setProperty('--container-bg', themeStyles.getPropertyValue('--container-bg'));
+            root.style.setProperty('--sidebar-bg', themeStyles.getPropertyValue('--sidebar-bg'));
+            root.style.setProperty('--reader-bg', themeStyles.getPropertyValue('--reader-bg'));
+            root.style.setProperty('--reader-text', themeStyles.getPropertyValue('--reader-text'));
+            root.style.setProperty('--control-bg', themeStyles.getPropertyValue('--control-bg'));
+            root.style.setProperty('--hover-bg', themeStyles.getPropertyValue('--hover-bg'));
+            root.style.setProperty('--current-bg', themeStyles.getPropertyValue('--current-bg'));
+            
+            // 应用主题到各个元素
+            document.body.style.backgroundColor = themeStyles.getPropertyValue('--bg-color');
+            document.body.style.color = themeStyles.getPropertyValue('--text-color');
+            
+            const container = document.querySelector('.container');
+            if (container) {
+                container.style.backgroundColor = themeStyles.getPropertyValue('--container-bg');
+            }
+            
+            const chapterList = document.querySelector('.chapter-list');
+            if (chapterList) {
+                chapterList.style.backgroundColor = themeStyles.getPropertyValue('--sidebar-bg');
+            }
+            
+            const readerContent = document.querySelector('.reader-content');
+            if (readerContent) {
+                readerContent.style.backgroundColor = themeStyles.getPropertyValue('--reader-bg');
+                readerContent.style.color = themeStyles.getPropertyValue('--reader-text');
+            }
+            
+            const readerControls = document.querySelector('.reader-controls');
+            if (readerControls) {
+                readerControls.style.backgroundColor = themeStyles.getPropertyValue('--control-bg');
+            }
+            
+            const chapterItems = document.querySelectorAll('.chapter-item');
+            chapterItems.forEach(item => {
+                item.style.backgroundColor = 'transparent';
+                if (item.classList.contains('current')) {
+                    item.style.backgroundColor = themeStyles.getPropertyValue('--current-bg');
+                }
+                
+                item.addEventListener('mouseenter', () => {
+                    item.style.backgroundColor = themeStyles.getPropertyValue('--hover-bg');
+                });
+                
+                item.addEventListener('mouseleave', () => {
+                    if (item.classList.contains('current')) {
+                        item.style.backgroundColor = themeStyles.getPropertyValue('--current-bg');
+                    } else {
+                        item.style.backgroundColor = 'transparent';
+                    }
+                });
+            });
+        }
+        
+        // 添加键盘导航
+        document.addEventListener('keydown', function(e) {
+            if (!readerContainer.style.display || readerContainer.style.display === 'none') return;
+            
+            if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                goToPrevChapter();
+                e.preventDefault();
+            } else if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+                goToNextChapter();
+                e.preventDefault();
+            } else if (e.key === 'Home') {
+                goToChapter(0);
+                e.preventDefault();
+            } else if (e.key === 'End') {
+                goToChapter(chapters.length - 1);
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
