@@ -111,7 +111,7 @@
         {size: 160, image: "images/image9.png"},
         {size: 180, image: "images/image10.png"}
     ];
-    const DEATH_LINE = 80;
+    const DEATH_LINE = 60;
     let gameOver = false;
 
     class Fruit {
@@ -124,7 +124,7 @@
             this.velocityY = 0;
             this.velocityX = 0;
             this.onTopOfOther = false; // 新增状态标记
-            
+            this.createdTime = Date.now(); // 记录创建时间
         }
 
         update() {
@@ -258,30 +258,33 @@
     function checkGameOver() {
         if (deathCheckTimer) return; // 避免重复触发定时器
 
-        const triggerFruits = fruits.filter(
-            fruit =>
-                fruit.velocityY < 0.1 &&
-                fruit.velocityX < 0.1 &&
-                fruit.y - fruit.radius <= DEATH_LINE
-        );
+        const triggerFruits = fruits.filter(fruit => {
+            // 添加速度阈值检查，确保水果真的静止了
+            const isStationary = Math.abs(fruit.velocityY) < 0.5 &&
+                Math.abs(fruit.velocityX) < 0.5;
+
+            // 添加新放置的水果检查（1秒内放置的不触发Game Over）
+            const isNewFruit = Date.now() - fruit.createdTime < 1000;
+
+            return isStationary && !isNewFruit && (fruit.y - fruit.radius <= DEATH_LINE);
+        });
 
         if (triggerFruits.length > 0) {
             deathCheckTimer = setTimeout(() => {
-                const stillTriggering = triggerFruits.some(
-                    fruit =>
-                        fruit.velocityY < 0.1 &&
-                        fruit.velocityX < 0.1 &&
-                        fruit.y - fruit.radius <= DEATH_LINE
-                );
+                const stillTriggering = triggerFruits.some(fruit => {
+                    const isStillStationary = Math.abs(fruit.velocityY) < 0.5 &&
+                        Math.abs(fruit.velocityX) < 0.5;
+                    return isStillStationary && (fruit.y - fruit.radius <= DEATH_LINE);
+                });
+
                 if (stillTriggering) {
                     gameOver = true;
                     gameOverMessage.style.display = "block";
+                    document.getElementById("restartButton").style.display = "block";
                     updateBestScore();
                 }
                 deathCheckTimer = null;
-            }, 3000); // 延迟3秒再检查
-        } else {
-            deathCheckTimer = null;
+            }, 1000); // 缩短检查延迟为1秒
         }
     }
 
