@@ -156,7 +156,6 @@
                         fruits.splice(j, 1);
                         fruits.splice(i, 1);
                         fruits.push(newFruit);
-                        score += newType * 10; // 根据类型给分
                         return;
                     } else {
                         resolveCollision(fruits[i], fruits[j]);
@@ -243,6 +242,7 @@
         let fruit = new Fruit(x, 30, nextFruitType);
         fruits.push(fruit);
         score+=fruitData[nextFruitType].size;
+        document.getElementById("scoreDisplay").textContent = score;
         nextFruitType = Math.floor(Math.random() *3);
         drawPreview();
     });
