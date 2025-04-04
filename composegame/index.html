@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="Merge Watermelon - Fun fruit merging game">
     <meta name="keywords" content="Donald Trump game,merging Donald Trump,iffunny,merge watermelon, fruit merge game, fun game, HTML5 game">
     <meta name="author" content="iffunny">
@@ -14,19 +14,59 @@
         body {
             text-align: center;
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            /* 新的背景样式 */
+            background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
         }
 
         canvas {
-            background-color: #f8f8f8;
+            background-color: rgba(255, 255, 255, 0.8);
             border: 2px solid #000;
             display: block;
             margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         #gameOverMessage {
             color: red;
             font-size: 24px;
             display: none;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        #restartButton {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        #restartButton:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
     </style>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-W3FSQNE2JY"></script>
@@ -83,27 +123,54 @@
             this.image = fruitImages[type]; // 使用预加载图片
             this.velocityY = 0;
             this.velocityX = 0;
+            this.onTopOfOther = false; // 新增状态标记
+            
         }
 
         update() {
+            // 重力加速度保持不变
             this.velocityY += 0.5;
+
+            // 只有当水果不在其他水果上时才应用摩擦力
+            if (!this.onTopOfOther) {
+                this.velocityX *= 0.98; // 轻微摩擦力
+            }
+
             this.y += this.velocityY;
             this.x += this.velocityX;
 
+            // 边界检测
             if (this.x - this.radius < 0) {
                 this.x = this.radius;
-                this.velocityX = 0;
+                this.velocityX *= -0.6;
             } else if (this.x + this.radius > canvas.width) {
                 this.x = canvas.width - this.radius;
-                this.velocityX = 0;
+                this.velocityX *= -0.6;
             }
 
             if (this.y + this.radius >= canvas.height) {
                 this.y = canvas.height - this.radius;
-                this.velocityY = 0;
+                this.velocityY *= -0.4;
+                this.onTopOfOther = false; // 接触地面不算在其他水果上
+            }
+
+            // 重置状态标记
+            this.onTopOfOther = false;
+        }
+        // 检查是否在其他水果上
+        checkIfOnTop(otherFruit) {
+            const dx = this.x - otherFruit.x;
+            const dy = this.y - otherFruit.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const minDistance = this.radius + otherFruit.radius;
+
+            // 如果在其他水果正上方接触
+            if (distance < minDistance && dy < 0 && Math.abs(dx) < this.radius) {
+                this.onTopOfOther = true;
+                // 给予轻微的水平推力促进滑动
+                this.velocityX += (Math.random() - 0.5) * 0.2;
             }
         }
-
         draw(ctx) {
             if (this.image && this.image.complete) {
                 ctx.drawImage(
@@ -140,21 +207,28 @@
         let dy = fruitB.y - fruitA.y;
         let distance = Math.sqrt(dx * dx + dy * dy);
         let overlap = fruitA.radius + fruitB.radius - distance;
+
         if (overlap > 0) {
             let angle = Math.atan2(dy, dx);
             let moveX = (overlap / 2) * Math.cos(angle);
             let moveY = (overlap / 2) * Math.sin(angle);
+
             fruitA.x -= moveX;
             fruitA.y -= moveY;
             fruitB.x += moveX;
             fruitB.y += moveY;
 
+            // 互相检查是否在对方上面
+            fruitA.checkIfOnTop(fruitB);
+            fruitB.checkIfOnTop(fruitA);
+
+            // 保留少量速度交换
             let tempVX = fruitA.velocityX;
             let tempVY = fruitA.velocityY;
-            fruitA.velocityX = fruitB.velocityX * 0.5;
-            fruitA.velocityY = fruitB.velocityY * 0.5;
-            fruitB.velocityX = tempVX * 0.5;
-            fruitB.velocityY = tempVY * 0.5;
+            fruitA.velocityX = fruitB.velocityX * 0.3;
+            fruitA.velocityY = fruitB.velocityY * 0.3;
+            fruitB.velocityX = tempVX * 0.3;
+            fruitB.velocityY = tempVY * 0.3;
         }
     }
 
