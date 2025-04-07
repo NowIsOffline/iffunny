@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+     <link rel="icon" type="image/png" sizes="32x32" href="../icon/small/ballgames/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../icon/small/ballgames/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../icon/small/ballgames/apple-touch-icon.png">
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-W3FSQNE2JY"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-W3FSQNE2JY');
+    </script>
+  <title>打砖块游戏</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      touch-action: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, sans-serif;
+      background: #0a0f2c;
+    }
+
+    #gameContainer {
+      position: relative;
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+    }
+
+    #gameArea {
+      position: relative;
+      flex-grow: 1;
+    }
+
+    canvas {
+      background: #0a0f2c;
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    #gameInfo {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-size: 16px;
+      z-index: 100;
+    }
+
+    #levelSelect {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    #levelSelect h1 {
+      color: white;
+      margin-bottom: 30px;
+    }
+
+    .level-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 500px;
+    }
+
+    .level-btn {
+      width: 100px;
+      height: 60px;
+      margin: 10px;
+      background: #6ea0f8;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .level-btn:hover {
+      background: #4d80e6;
+      transform: scale(1.05);
+    }
+
+    /* PC端菜单样式 */
+    #pcMenu {
+      width: 150px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 5px;
+      padding: 10px;
+      margin-left: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .menu-btn {
+      background: #6ea0f8;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      padding: 8px 12px;
+      margin: 5px 0;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .menu-btn:hover {
+      background: #4d80e6;
+    }
+
+    /* 移动端菜单样式 */
+    #mobileMenuBtn {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: #6ea0f8;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+      z-index: 300;
+      display: none;
+    }
+
+    #mobileMenu {
+      position: fixed;
+      top: 60px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.9);
+      border-radius: 5px;
+      padding: 10px;
+      z-index: 300;
+      display: none;
+      flex-direction: column;
+      min-width: 120px;
+    }
+
+    @media (max-width: 768px) {
+      #gameContainer {
+        max-width: 100%;
+        height: 100%;
+      }
+
+      #pcMenu {
+        display: none;
+      }
+
+      #mobileMenuBtn {
+        display: block;
+      }
+
+      #mobileMenu.show {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+<div id="levelSelect" style="display: none">
+  <h1>选择关卡</h1>
+  <div class="level-buttons" id="levelButtons"></div>
+</div>
+
+<button id="mobileMenuBtn">☰</button>
+<div id="mobileMenu">
+  <button class="menu-btn" id="selectLevelBtn">选择关卡</button>
+
+  <button class="menu-btn" id="homeBtn">返回主页</button>
+</div>
+
+<div id="gameContainer">
+  <div id="gameArea">
+    <div id="gameInfo">掉落次数: <span id="missCount">0</span></div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+  </div>
+  <div id="pcMenu">
+    <button class="menu-btn" id="pcSelectLevelBtn">选择关卡</button>
+
+    <button class="menu-btn" id="pcHomeBtn">返回主页</button>
+  </div>
+</div>
+
+<audio id="sound-launch" src="../sounds/sound-launch.wav"></audio>
+<audio id="sound-hit" src="../sounds/sound-hit.wav"></audio>
+<audio id="sound-win" src="../sounds/sound-win.wav"></audio>
+
+<script>
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const missCountDisplay = document.getElementById('missCount');
+  const levelSelect = document.getElementById('levelSelect');
+  const levelButtons = document.getElementById('levelButtons');
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  const selectLevelBtn = document.getElementById('selectLevelBtn');
+  const rechargeBtn = document.getElementById('rechargeBtn');
+  const homeBtn = document.getElementById('homeBtn');
+  const pcSelectLevelBtn = document.getElementById('pcSelectLevelBtn');
+  const pcRechargeBtn = document.getElementById('pcRechargeBtn');
+  const pcHomeBtn = document.getElementById('pcHomeBtn');
+
+  let missCount = 0;
+
+  // 16种颜色配置
+  const COLORS = [
+    '#FF0000', '#00FF00', '#0000FF', '#FFFF00',
+    '#FF00FF', '#00FFFF', '#FF8000', '#8000FF',
+    '#0080FF', '#FF0080', '#80FF00', '#00FF80',
+    '#800000', '#008000', '#000080', '#808080'
+  ];
+
+  // 颜色和撞击次数解码函数
+  function decodeBlockValue(value) {
+    if (value === 0) return null; // 0表示无方块
+    const colorIndex = Math.floor(value / 16);
+    const hits = value % 16;
+    return {
+      color: COLORS[colorIndex % COLORS.length],
+      maxHits: hits, // 至少需要1次撞击
+      hits: 0 // 已撞击次数
+    };
+  }
+
+  // 音效
+  const soundLaunch = document.getElementById('sound-launch');
+  const soundHit = document.getElementById('sound-hit');
+  const soundWin = document.getElementById('sound-win');
+  soundWin.addEventListener("ended",function (){
+    this.pause();
+    this.currentTime=0;
+  });
+
+  // 挡板
+  const paddle = {
+    width: 100,
+    height: 15,
+    x: (canvas.width - 100) / 2,
+    y: canvas.height - 20,
+    color: '#6ea0f8'
+  };
+
+  // 小球
+  const ball = {
+    x: paddle.x + paddle.width / 2,
+    y: paddle.y - 9,
+    radius: 8,
+    vx: 0,
+    vy: 0,
+    speed:5,
+    inMotion: false
+  };
+
+  // 方块和关卡配置
+  const blockWidth = 24;
+  const blockHeight = 16;
+  const gap = 2;
+  let blocks = [];
+
+  // 关卡设计：值 = 16*颜色下标 + 撞击次数
+  const levels = [
+    [
+      [1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+      [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+      [1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+      [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+      [1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+      [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+      [1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+      [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+      [1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+      [0, 1, 0, 1, 0, 1, 0, 1, 0, 1]
+    ],
+    [
+      [16*9+1, 16*10+2, 16*11+3, 16*12+4],
+      [16*13+2, 16*14+1, 16*15+3, 16*0+2],
+      [16*1+4, 16*2+1, 16*3+2, 16*4+3]
+    ],
+    [
+      [16*5+1, 16*6+1, 16*7+1, 16*8+1, 16*9+1],
+      [16*10+2, 16*11+2, 16*12+2, 16*13+2, 16*14+2],
+      [16*15+3, 16*0+3, 16*1+3, 16*2+3, 16*3+3],
+      [16*4+4, 16*5+4, 16*6+4, 16*7+4, 16*8+4]
+    ]
+  ];
+  let currentLevel = 0;
+
+  // 创建关卡选择按钮
+  function createLevelButtons() {
+    levelButtons.innerHTML = '';
+    levels.forEach((level, index) => {
+      const button = document.createElement('button');
+      button.className = 'level-btn';
+      button.textContent = `关卡 ${index + 1}`;
+      button.addEventListener('click', () => {
+        startLevel(index);
+      });
+      levelButtons.appendChild(button);
+    });
+  }
+
+  // 开始指定关卡
+  function startLevel(levelIndex) {
+    currentLevel = levelIndex;
+    levelSelect.style.display = 'none';
+    createBlocksFromLevel(levels[currentLevel]);
+    resetBall();
+    resizeCanvas();
+  }
+
+  // 显示关卡选择界面
+  function showLevelSelect() {
+    levelSelect.style.display = 'flex';
+  }
+
+  // 动态设置canvas尺寸
+  function resizeCanvas() {
+    const isMobile = window.innerWidth <= 768;
+
+    if (isMobile) {
+      // 移动端 - 全屏
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    } else {
+      // PC端 - 固定大小
+      const container = document.getElementById('gameArea');
+      const ratio = 600 / 800;
+      canvas.width = container.clientWidth;
+      canvas.height = canvas.width * ratio;
+    }
+
+    // 调整挡板和小球位置
+    paddle.width = canvas.width * 0.15;
+    paddle.y = canvas.height - 30;
+    resetBall();
+
+    // 重新创建方块以适应新尺寸
+    if(levels[currentLevel]) {
+      createBlocksFromLevel(levels[currentLevel]);
+    }
+  }
+
+  window.addEventListener('resize', resizeCanvas);
+
+  function createBlocksFromLevel(levelData) {
+    blocks = [];
+    const offsetX = (canvas.width - (levelData[0].length * (blockWidth + gap))) / 2;
+    const offsetY = 50;
+
+    levelData.forEach((row, i) => {
+      row.forEach((value, j) => {
+        const blockConfig = decodeBlockValue(value);
+        if (blockConfig) {
+          blocks.push({
+            x: offsetX + j * (blockWidth + gap),
+            y: offsetY + i * (blockHeight + gap),
+            color: blockConfig.color,
+            maxHits: blockConfig.maxHits,
+            hits: blockConfig.hits
+          });
+        }
+      });
+    });
+  }
+
+  function drawBlocks() {
+    blocks.forEach(block => {
+      ctx.fillStyle = block.color;
+      ctx.fillRect(block.x, block.y, blockWidth, blockHeight);
+
+      // 显示剩余碰撞次数
+      ctx.fillStyle = 'white';
+      ctx.font = '10px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(
+              (block.maxHits - block.hits).toString(),
+              block.x + blockWidth/2,
+              block.y + blockHeight/2 + 3
+      );
+    });
+  }
+
+  function drawPaddle() {
+    ctx.fillStyle = paddle.color;
+    ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+  }
+
+  function drawBall() {
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+  }
+
+  function resetBall() {
+    ball.inMotion = false;
+    ball.x = paddle.x + paddle.width / 2;
+    ball.y = paddle.y - ball.radius - 1;
+    ball.vx = 0;
+    ball.vy = 0;
+  }
+
+  function moveBall() {
+    if (!ball.inMotion) return;
+
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+
+    // 墙壁碰撞
+    if (ball.x <= ball.radius || ball.x >= canvas.width - ball.radius) {
+      ball.vx *= -1;
+      playHitSound();
+    }
+    if (ball.y <= ball.radius) {
+      ball.vy *= -1;
+      playHitSound();
+    }
+
+    // 挡板碰撞
+    if (
+            ball.y + ball.radius >= paddle.y &&
+            ball.x >= paddle.x &&
+            ball.x <= paddle.x + paddle.width &&
+            ball.vy > 0
+    ) {
+      const hit = (ball.x - paddle.x) / paddle.width - 0.5;
+      const angle = hit * Math.PI / 2;
+      const speed = ball.speed;
+      ball.vx = speed * Math.sin(angle);
+      ball.vy = -Math.abs(speed * Math.cos(angle));
+      ball.y = paddle.y - ball.radius - 1;
+      playHitSound();
+    }
+
+    // 底部失误
+    if (ball.y - ball.radius > canvas.height) {
+      missCount++;
+      missCountDisplay.textContent = missCount;
+      resetBall();
+    }
+
+    // 碰撞砖块
+    for (let i = 0; i < blocks.length; i++) {
+      const block = blocks[i];
+      if (
+              ball.x + ball.radius > block.x &&
+              ball.x - ball.radius < block.x + blockWidth &&
+              ball.y + ball.radius > block.y &&
+              ball.y - ball.radius < block.y + blockHeight
+      ) {
+        block.hits++;
+
+        if (block.hits >= block.maxHits) {
+          blocks.splice(i, 1);
+        }
+
+        playHitSound();
+        ball.vy *= -1;
+        break;
+      }
+    }
+
+    if (blocks.length === 0) {
+      soundWin.play();
+      showLevelSelect();
+    }
+  }
+
+  function playHitSound(){
+    soundHit.currentTime = 0;
+    soundHit.play();
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBlocks();
+    drawPaddle();
+    drawBall();
+  }
+
+  function loop() {
+    draw();
+    moveBall();
+    requestAnimationFrame(loop);
+  }
+
+  // 菜单功能
+  mobileMenuBtn.addEventListener('click', function() {
+    mobileMenu.classList.toggle('show');
+  });
+
+  // 选择关卡按钮
+  selectLevelBtn.addEventListener('click', function() {
+    mobileMenu.classList.remove('show');
+    showLevelSelect();
+  });
+
+  pcSelectLevelBtn.addEventListener('click', function() {
+    showLevelSelect();
+  });
+
+ 
+
+  // 返回主页按钮
+  homeBtn.addEventListener('click', function() {
+    mobileMenu.classList.remove('show');
+    window.location.href = "https://iffunny.com/ballgames/mapCreate.html"; // 替换为实际主页URL
+  });
+
+  pcHomeBtn.addEventListener('click', function() {
+    window.location.href = "https://iffunny.com/ballgames/mapCreate.html"; // 替换为实际主页URL
+  });
+
+  // 点击游戏区域外关闭移动菜单
+  document.addEventListener('click', function(e) {
+    if (!mobileMenu.contains(e.target) && e.target !== mobileMenuBtn) {
+      mobileMenu.classList.remove('show');
+    }
+  });
+
+  canvas.addEventListener('click', e => {
+    if (!ball.inMotion) {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const angle = Math.atan2(y - ball.y, x - ball.x);
+      ball.vx = Math.cos(angle) * ball.speed;
+      ball.vy = Math.sin(angle) * ball.speed;
+      ball.inMotion = true;
+      soundLaunch.currentTime = 0;
+      soundLaunch.play();
+    }
+  });
+
+  function handlePointerMove(clientX) {
+    const rect = canvas.getBoundingClientRect();
+    let x = clientX - rect.left - paddle.width / 2;
+    x = Math.max(0, Math.min(x, canvas.width - paddle.width));
+    paddle.x = x;
+
+    if (!ball.inMotion) {
+      ball.x = paddle.x + paddle.width / 2;
+    }
+  }
+
+  // 使用requestAnimationFrame节流
+  let lastTouchTime = 0;
+  canvas.addEventListener('touchmove', e => {
+    const now = Date.now();
+    if (now - lastTouchTime > 16) {
+      e.preventDefault();
+      handlePointerMove(e.touches[0].clientX);
+      lastTouchTime = now;
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('mousemove', e => handlePointerMove(e.clientX));
+
+  // 初始化游戏
+  createLevelButtons();
+  resizeCanvas();
+  loop();
+</script>
+</body>
+</html>
