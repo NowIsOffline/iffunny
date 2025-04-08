@@ -177,6 +177,14 @@
         display: flex;
       }
     }
+    /* 可以添加特定的导入按钮样式 */
+    #importLevelBtn, #pcImportLevelBtn {
+      background: #4CAF50; /* 绿色表示导入操作 */
+    }
+
+    #importLevelBtn:hover, #pcImportLevelBtn:hover {
+      background: #3e8e41;
+    }
   </style>
 </head>
 <body>
@@ -188,7 +196,7 @@
 <button id="mobileMenuBtn">☰</button>
 <div id="mobileMenu">
   <button class="menu-btn" id="selectLevelBtn">选择关卡</button>
-
+  <button class="menu-btn" id="importLevelBtn">导入关卡</button>
   <button class="menu-btn" id="homeBtn">制作关卡</button>
 </div>
 
@@ -199,7 +207,7 @@
   </div>
   <div id="pcMenu">
     <button class="menu-btn" id="pcSelectLevelBtn">选择关卡</button>
-
+    <button class="menu-btn" id="pcImportLevelBtn">导入关卡</button>
     <button class="menu-btn" id="pcHomeBtn">制作关卡</button>
   </div>
 </div>
@@ -222,9 +230,44 @@
   const pcSelectLevelBtn = document.getElementById('pcSelectLevelBtn');
   const pcRechargeBtn = document.getElementById('pcRechargeBtn');
   const pcHomeBtn = document.getElementById('pcHomeBtn');
-
+  // 导入关卡按钮
+  const importLevelBtn = document.getElementById('importLevelBtn');
+  const pcImportLevelBtn = document.getElementById('pcImportLevelBtn');
   let missCount = 0;
+  // 导入关卡功能
+  function importLevel() {
+    mobileMenu.classList.remove('show');
 
+    const levelData = prompt("请粘贴关卡数据(二维数组):\n例如: [[1,0,1],[0,1,0]]", "");
+
+    if (levelData) {
+      try {
+        const newLevel = JSON.parse(levelData);
+
+        // 验证数据格式
+        if (!Array.isArray(newLevel) || !newLevel.every(row => Array.isArray(row))) {
+          throw new Error("无效的关卡格式");
+        }
+
+        // 添加到关卡列表
+        levels.push(newLevel);
+
+        // 更新关卡选择界面
+        createLevelButtons();
+
+        // 自动选择新关卡
+        startLevel(levels.length - 1);
+
+        alert(`成功导入关卡 ${levels.length}`);
+      } catch (e) {
+        alert("导入失败: " + e.message);
+      }
+    }
+  }
+
+  // 绑定按钮事件
+  importLevelBtn.addEventListener('click', importLevel);
+  pcImportLevelBtn.addEventListener('click', importLevel);
   // 16种颜色配置
   const COLORS = [
     '#FF0000', '#00FF00', '#0000FF', '#FFFF00',

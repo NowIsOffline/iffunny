@@ -68,243 +68,301 @@
         .presets {
             margin-top: 20px;
         }
+
+        /* Mobile landscape styles */
+        @media screen and (max-width: 768px) and (orientation: landscape) {
+            body {
+                padding: 10px;
+                max-width: none;
+            }
+            .editor-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .controls {
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .controls > div {
+                flex: 1;
+                min-width: 120px;
+            }
+            .color-palette {
+                max-width: 100%;
+                overflow-x: auto;
+                padding-bottom: 5px;
+            }
+            .grid {
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+            .cell {
+                width: 30px;
+                height: 25px;
+                font-size: 12px;
+            }
+            .presets {
+                margin-top: 10px;
+            }
+            button {
+                padding: 6px 10px;
+                font-size: 12px;
+                margin-bottom: 5px;
+            }
+            input[type="number"] {
+                width: 40px;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>打砖块关卡编辑器</h1>
-    
-    <div class="editor-container">
-        <div class="controls">
+<h1>打砖块关卡编辑器</h1>
+
+<div class="editor-container">
+    <div class="controls">
+        <div>
             <h3>配置选项</h3>
-            <div>
-                <label>行数: <input type="number" id="rows" min="1" max="10" value="5"></label>
-                <label>列数: <input type="number" id="cols" min="1" max="15" value="7"></label>
-            </div>
-            
+            <label>行数: <input type="number" id="rows" min="1" max="10" value="5"></label>
+            <label>列数: <input type="number" id="cols" min="1" max="15" value="7"></label>
+        </div>
+
+        <div>
             <h3>颜色选择</h3>
             <div class="color-palette" id="colorPalette">
                 <!-- 颜色选项将通过JS动态生成 -->
             </div>
-            
-            <div>
-                <label>当前数字值: <input type="number" id="cellValue" min="0" max="9" value="1" placeholder="0 is clear"
-                oninput="if(value>9||value<0)value = 9"></label>
-            </div>
-            
-            <div>
-                <button id="clearBtn">清空</button>
-                <button id="fillBtn">填充</button>
-            </div>
-            
-            <div class="presets">
-                <h3>预设</h3>
-                <button id="pyramidBtn">金字塔</button>
-                <button id="checkerBtn">棋盘</button>
-                <button id="borderBtn">边框</button>
-            </div>
         </div>
-        
-        <div class="grid-container">
-            <h3>关卡编辑区</h3>
-            <div class="grid" id="grid"></div>
-            <button id="generateBtn">生成关卡数据</button>
-            <textarea id="output" readonly></textarea>
+
+        <div>
+            <label>当前数字值: <input type="number" id="cellValue" min="0" max="9" value="1" placeholder="0 is clear"
+                                      oninput="if(value>9||value<0)value = 9"></label>
+        </div>
+
+        <div>
+            <button id="clearBtn">清空</button>
+            <button id="fillBtn">填充</button>
+        </div>
+
+        <div class="presets">
+            <h3>预设</h3>
+            <button id="pyramidBtn">金字塔</button>
+            <button id="checkerBtn">棋盘</button>
+            <button id="borderBtn">边框</button>
         </div>
     </div>
 
-    <script>
-        // 颜色配置
-        const COLORS = [
-            '#FF0000', '#00FF00', '#0000FF', '#FFFF00',
-            '#FF00FF', '#00FFFF', '#FF8000', '#8000FF',
-            '#0080FF', '#FF0080', '#80FF00', '#00FF80',
-            '#800000', '#008000', '#000080', '#808080'
-        ];
-        
-        // 当前选中的颜色ID
-        let selectedColorIndex = 1;
-        let rows = 5;
-        let cols = 7;
-        let gridData = [];
-        
-        // 初始化颜色选择器
-        function initColorPalette() {
-            const palette = document.getElementById('colorPalette');
-            palette.innerHTML = '';
-            
-            COLORS.forEach(color => {
-                const colorEl = document.createElement('div');
-                colorEl.style.backgroundColor = color;
-                colorEl.title = `${color}`;
-                colorEl.className = "color-option";
-                colorEl.addEventListener('click', () => {
-                    selectedColorIndex = COLORS.indexOf(color);
-                    document.querySelectorAll('.color-option').forEach(el => {
-                        el.classList.remove('selected');
-                    });
-                    colorEl.classList.add('selected');
+    <div class="grid-container">
+        <h3>关卡编辑区</h3>
+        <div class="grid" id="grid"></div>
+        <button id="generateBtn">生成关卡数据</button>
+        <textarea id="output" readonly></textarea>
+    </div>
+</div>
+
+<script>
+    // 颜色配置
+    const COLORS = [
+        '#FF0000', '#00FF00', '#0000FF', '#FFFF00',
+        '#FF00FF', '#00FFFF', '#FF8000', '#8000FF',
+        '#0080FF', '#FF0080', '#80FF00', '#00FF80',
+        '#800000', '#008000', '#000080', '#808080'
+    ];
+
+    // 当前选中的颜色ID
+    let selectedColorIndex = 1;
+    let rows = 5;
+    let cols = 7;
+    let gridData = [];
+
+    // 初始化颜色选择器
+    function initColorPalette() {
+        const palette = document.getElementById('colorPalette');
+        palette.innerHTML = '';
+
+        COLORS.forEach(color => {
+            const colorEl = document.createElement('div');
+            colorEl.style.backgroundColor = color;
+            colorEl.title = `${color}`;
+            colorEl.className = "color-option";
+            colorEl.addEventListener('click', () => {
+                selectedColorIndex = COLORS.indexOf(color);
+                document.querySelectorAll('.color-option').forEach(el => {
+                    el.classList.remove('selected');
                 });
-                
-                palette.appendChild(colorEl);
+                colorEl.classList.add('selected');
             });
-        }
-        
-        // 初始化网格
-        function initGrid() {
-            const grid = document.getElementById('grid');
-            grid.innerHTML = '';
-            
-            rows = parseInt(document.getElementById('rows').value);
-            cols = parseInt(document.getElementById('cols').value);
-            
-            // 重置网格数据
-            gridData = Array(rows).fill().map(() => Array(cols).fill(0));
-            
-            // 设置网格样式
-            grid.style.gridTemplateRows = `repeat(${rows}, 32px)`;
-            grid.style.gridTemplateColumns = `repeat(${cols}, 42px)`;
-            
-            // 创建单元格
-            for (let i = 0; i < rows; i++) {
-                for (let j = 0; j < cols; j++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
-                    cell.dataset.row = i;
-                    cell.dataset.col = j;
-                    
-                    cell.addEventListener('click', () => {
-                        const value = parseInt(document.getElementById('cellValue').value);
-                        // 更新数据和UI
-                        if(value>0){
-                            gridData[i][j] = COLORS.length*selectedColorIndex+value;
-                        }else{
-                            gridData[i][j]=0;
-                        }
-                       
-                        updateCellAppearance(cell, gridData[i][j]);
-                    });
-                    
-                    grid.appendChild(cell);
-                }
-            }
-        }
-        
-        // 更新单元格外观
-        function updateCellAppearance(cell, value) {
-            if(value>0){
-                const colorIndex = Math.floor(value / 16);
-                const hits = value % 16;
-                cell.style.backgroundColor =COLORS[colorIndex];
-                cell.textContent = hits > 0 ? hits : '';
-            }else{
-                cell.style.backgroundColor ="#fff";
-                cell.textContent = '';
-            }
-          
-        }
-        
-        // 生成关卡数据
-        function generateLevelData() {
-            const output = [];
-            
-            for (let i = 0; i < rows; i++) {
-                const row = [];
-                for (let j = 0; j < cols; j++) {
-                    row.push(gridData[i][j]);
-                }
-                output.push(`[${row.join(', ')}]`);
-            }
-            
-            document.getElementById('output').value = `[\n  ${output.join(',\n  ')}\n]`;
-        }
-        
-        // 清空网格
-        function clearGrid() {
-            for (let i = 0; i < rows; i++) {
-                for (let j = 0; j < cols; j++) {
-                    gridData[i][j] = 0;
-                }
-            }
-            updateGridUI();
-        }
-        
-        // 填充网格
-        function fillGrid() {
-            const value = parseInt(document.getElementById('cellValue').value);
-            var color = COLORS.length*selectedColorIndex;
-            for (let i = 0; i < rows; i++) {
-                for (let j = 0; j < cols; j++) {
-                    gridData[i][j] = color+value;
-                }
-            }
-            updateGridUI();
-        }
-        
-        // 更新网格UI
-        function updateGridUI() {
-            const cells = document.querySelectorAll('.cell');
-            cells.forEach(cell => {
-                const row = parseInt(cell.dataset.row);
-                const col = parseInt(cell.dataset.col);
-                updateCellAppearance(cell, gridData[row][col]);
-            });
-        }
-        
-        // 预设：金字塔
-        function pyramidPreset() {
-            clearGrid();
-            const center = Math.floor(cols / 2);
-            const maxHeight = Math.min(rows, center + 1);
-            
-            for (let i = 0; i < maxHeight; i++) {
-                const start = center - i;
-                const end = center + i;
-                for (let j = start; j <= end; j++) {
-                    if (j >= 0 && j < cols) {
-                        gridData[i][j] = 2;
-                    }
-                }
-            }
-            updateGridUI();
-        }
-        
-        // 预设：棋盘
-        function checkerPreset() {
-            const value = parseInt(document.getElementById('cellValue').value);
-            for (let i = 0; i < rows; i++) {
-                for (let j = 0; j < cols; j++) {
-                    gridData[i][j] = (i + j) % 2 === 0 ? value : 0;
-                }
-            }
-            updateGridUI();
-        }
-        
-        // 预设：边框
-        function borderPreset() {
-            const value = parseInt(document.getElementById('cellValue').value);
-            for (let i = 0; i < rows; i++) {
-                for (let j = 0; j < cols; j++) {
-                    gridData[i][j] = (i === 0 || i === rows-1 || j === 0 || j === cols-1) ? value : 0;
-                }
-            }
-            updateGridUI();
-        }
-        
-        // 初始化
-        document.addEventListener('DOMContentLoaded', () => {
-            initColorPalette();
-            initGrid();
-            
-            // 事件监听
-            document.getElementById('rows').addEventListener('change', initGrid);
-            document.getElementById('cols').addEventListener('change', initGrid);
-            document.getElementById('generateBtn').addEventListener('click', generateLevelData);
-            document.getElementById('clearBtn').addEventListener('click', clearGrid);
-            document.getElementById('fillBtn').addEventListener('click', fillGrid);
-            document.getElementById('pyramidBtn').addEventListener('click', pyramidPreset);
-            document.getElementById('checkerBtn').addEventListener('click', checkerPreset);
-            document.getElementById('borderBtn').addEventListener('click', borderPreset);
+
+            palette.appendChild(colorEl);
         });
-    </script>
+    }
+
+    // 初始化网格
+    function initGrid() {
+        const grid = document.getElementById('grid');
+        grid.innerHTML = '';
+
+        rows = parseInt(document.getElementById('rows').value);
+        cols = parseInt(document.getElementById('cols').value);
+
+        // 重置网格数据
+        gridData = Array(rows).fill().map(() => Array(cols).fill(0));
+
+        // 设置网格样式
+        grid.style.gridTemplateRows = `repeat(${rows}, 32px)`;
+        grid.style.gridTemplateColumns = `repeat(${cols}, 42px)`;
+
+        // 如果是移动端横屏，调整单元格大小
+        if (window.matchMedia("(max-width: 768px) and (orientation: landscape)").matches) {
+            grid.style.gridTemplateRows = `repeat(${rows}, 26px)`;
+            grid.style.gridTemplateColumns = `repeat(${cols}, 32px)`;
+        }
+
+        // 创建单元格
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.dataset.row = i;
+                cell.dataset.col = j;
+
+                cell.addEventListener('click', () => {
+                    const value = parseInt(document.getElementById('cellValue').value);
+                    // 更新数据和UI
+                    if(value>0){
+                        gridData[i][j] = COLORS.length*selectedColorIndex+value;
+                    }else{
+                        gridData[i][j]=0;
+                    }
+
+                    updateCellAppearance(cell, gridData[i][j]);
+                });
+
+                grid.appendChild(cell);
+            }
+        }
+    }
+
+    // 更新单元格外观
+    function updateCellAppearance(cell, value) {
+        if(value>0){
+            const colorIndex = Math.floor(value / 16);
+            const hits = value % 16;
+            cell.style.backgroundColor =COLORS[colorIndex];
+            cell.textContent = hits > 0 ? hits : '';
+        }else{
+            cell.style.backgroundColor ="#fff";
+            cell.textContent = '';
+        }
+
+    }
+
+    // 生成关卡数据
+    function generateLevelData() {
+        const output = [];
+
+        for (let i = 0; i < rows; i++) {
+            const row = [];
+            for (let j = 0; j < cols; j++) {
+                row.push(gridData[i][j]);
+            }
+            output.push(`[${row.join(', ')}]`);
+        }
+
+        document.getElementById('output').value = `[\n  ${output.join(',\n  ')}\n]`;
+    }
+
+    // 清空网格
+    function clearGrid() {
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                gridData[i][j] = 0;
+            }
+        }
+        updateGridUI();
+    }
+
+    // 填充网格
+    function fillGrid() {
+        const value = parseInt(document.getElementById('cellValue').value);
+        var color = COLORS.length*selectedColorIndex;
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                gridData[i][j] = color+value;
+            }
+        }
+        updateGridUI();
+    }
+
+    // 更新网格UI
+    function updateGridUI() {
+        const cells = document.querySelectorAll('.cell');
+        cells.forEach(cell => {
+            const row = parseInt(cell.dataset.row);
+            const col = parseInt(cell.dataset.col);
+            updateCellAppearance(cell, gridData[row][col]);
+        });
+    }
+
+    // 预设：金字塔
+    function pyramidPreset() {
+        clearGrid();
+        const center = Math.floor(cols / 2);
+        const maxHeight = Math.min(rows, center + 1);
+
+        for (let i = 0; i < maxHeight; i++) {
+            const start = center - i;
+            const end = center + i;
+            for (let j = start; j <= end; j++) {
+                if (j >= 0 && j < cols) {
+                    gridData[i][j] = 2;
+                }
+            }
+        }
+        updateGridUI();
+    }
+
+    // 预设：棋盘
+    function checkerPreset() {
+        const value = parseInt(document.getElementById('cellValue').value);
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                gridData[i][j] = (i + j) % 2 === 0 ? value : 0;
+            }
+        }
+        updateGridUI();
+    }
+
+    // 预设：边框
+    function borderPreset() {
+        const value = parseInt(document.getElementById('cellValue').value);
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                gridData[i][j] = (i === 0 || i === rows-1 || j === 0 || j === cols-1) ? value : 0;
+            }
+        }
+        updateGridUI();
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+        initColorPalette();
+        initGrid();
+
+        // 事件监听
+        document.getElementById('rows').addEventListener('change', initGrid);
+        document.getElementById('cols').addEventListener('change', initGrid);
+        document.getElementById('generateBtn').addEventListener('click', generateLevelData);
+        document.getElementById('clearBtn').addEventListener('click', clearGrid);
+        document.getElementById('fillBtn').addEventListener('click', fillGrid);
+        document.getElementById('pyramidBtn').addEventListener('click', pyramidPreset);
+        document.getElementById('checkerBtn').addEventListener('click', checkerPreset);
+        document.getElementById('borderBtn').addEventListener('click', borderPreset);
+
+        // 监听横屏变化
+        window.addEventListener('resize', initGrid);
+    });
+</script>
 </body>
 </html>
