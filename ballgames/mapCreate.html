@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>打砖块关卡编辑器</title>
+    <title>Brick Breaker Level Editor</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -68,6 +68,11 @@
         .presets {
             margin-top: 20px;
         }
+        .language-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
 
         /* Mobile landscape styles */
         @media screen and (max-width: 768px) and (orientation: landscape) {
@@ -114,39 +119,47 @@
             input[type="number"] {
                 width: 40px;
             }
+            .language-switcher {
+                position: static;
+                margin-bottom: 10px;
+            }
         }
     </style>
 </head>
 <body>
-<h1>打砖块关卡编辑器</h1>
+<h1 id="title">Brick Breaker Level Editor</h1>
+<div class="language-switcher">
+    <button id="langToggle">English</button>
+</div>
 
 <div class="editor-container">
     <div class="controls">
         <div>
-            <h3>配置选项</h3>
-            <label>行数: <input type="number" id="rows" min="1" max="10" value="5"></label>
-            <label>列数: <input type="number" id="cols" min="1" max="15" value="7"></label>
+            <h3 id="configOptions">Configuration</h3>
+            <div>  <label id="rowsLabel">Rows:</label><input type="number" id="rows" min="1" max="10" value="5"></div>
+            <div>  <label id="colsLabel">Columns:</label><input type="number" id="cols" min="1" max="15" value="7"></div>
         </div>
 
         <div>
-            <h3>颜色选择</h3>
+            <h3 id="colorSelection">Color Selection</h3>
             <div class="color-palette" id="colorPalette">
                 <!-- 颜色选项将通过JS动态生成 -->
             </div>
         </div>
 
         <div>
-            <label>当前数字值: <input type="number" id="cellValue" min="0" max="9" value="1" placeholder="0 is clear"
-                                      oninput="if(value>9||value<0)value = 9"></label>
+            <label id="cellValueLabel">Current value:</label>
+            <input type="number" id="cellValue" min="0" max="9" value="1" placeholder="0 is clear"
+                   oninput="if(value>9||value<0)value = 9">
         </div>
 
         <div>
-            <button id="clearBtn">清空</button>
-            <button id="fillBtn">填充</button>
+            <button id="clearBtn">Clear</button>
+            <button id="fillBtn">Fill</button>
         </div>
 
         <div class="presets">
-            <h3>预设</h3>
+            <h3 id="presetsTitle">Presets</h3>
             <button id="pyramidBtn">金字塔</button>
             <button id="checkerBtn">棋盘</button>
             <button id="borderBtn">边框</button>
@@ -154,20 +167,22 @@
     </div>
 
     <div class="grid-container">
-        <h3>关卡编辑区</h3>
+        <h3 id="editorTitle">Level Editor</h3>
+        <span id="firstColorHint">First color represents indestructible blocks</span>
         <div class="grid" id="grid"></div>
         <button id="generateBtn">生成关卡数据</button>
         <textarea id="output" readonly></textarea>
+        <span id="emailHint">Send to me and your level might be included. My email: Offline2048@163.com</span>
     </div>
 </div>
 
 <script>
     // 颜色配置
     const COLORS = [
-        '#FF0000', '#00FF00', '#0000FF', '#FFFF00',
+        '#737171', '#FF0000', '#0000FF', '#FFFF00',
         '#FF00FF', '#00FFFF', '#FF8000', '#8000FF',
         '#0080FF', '#FF0080', '#80FF00', '#00FF80',
-        '#800000', '#008000', '#000080', '#808080'
+        '#800000', '#008000', '#000080',
     ];
 
     // 当前选中的颜色ID
@@ -175,6 +190,81 @@
     let rows = 5;
     let cols = 7;
     let gridData = [];
+    let currentLang = 'en';
+    const rowsDom = document.getElementById('rows');
+    const colsDom = document.getElementById('cols')
+    // 翻译文本
+    const translations = {
+        zh: {
+            title: "打砖块关卡编辑器",
+            configOptions: "配置选项",
+            rowsLabel: "行数:",
+            colsLabel: "列数:",
+            colorSelection: "颜色选择",
+            cellValueLabel: "当前数字值:",
+            clearBtn: "清空",
+            fillBtn: "填充",
+            presetsTitle: "预设",
+            pyramidBtn: "金字塔",
+            checkerBtn: "棋盘",
+            borderBtn: "边框",
+            editorTitle: "关卡编辑区",
+            firstColorHint: "第一个颜色代表不可消灭方块",
+            generateBtn: "生成关卡数据",
+            emailHint: "发送给我将有可能收录你的关卡，我的邮箱：Offline2048@163.com",
+            langToggle: "English"
+        },
+        en: {
+            title: "Brick Breaker Level Editor",
+            configOptions: "Configuration",
+            rowsLabel: "Rows:",
+            colsLabel: "Columns:",
+            colorSelection: "Color Selection",
+            cellValueLabel: "Current value:",
+            clearBtn: "Clear",
+            fillBtn: "Fill",
+            presetsTitle: "Presets",
+            pyramidBtn: "Pyramid",
+            checkerBtn: "Checker",
+            borderBtn: "Border",
+            editorTitle: "Level Editor",
+            firstColorHint: "First color represents indestructible blocks",
+            generateBtn: "Generate Level Data",
+            emailHint: "Send to me and your level might be included. My email: Offline2048@163.com",
+            langToggle: "中文"
+        }
+    };
+
+    // 切换语言
+    function toggleLanguage() {
+        currentLang = currentLang === 'zh' ? 'en' : 'zh';
+        updateLanguage();
+    }
+
+    // 更新界面语言
+    function updateLanguage() {
+        const langData = translations[currentLang];
+        document.getElementById('title').textContent = langData.title;
+        document.getElementById('configOptions').textContent = langData.configOptions;
+        document.getElementById('rowsLabel').textContent = langData.rowsLabel;
+        document.getElementById('colsLabel').textContent = langData.colsLabel;
+        document.getElementById('colorSelection').textContent = langData.colorSelection;
+        document.getElementById('cellValueLabel').textContent = langData.cellValueLabel;
+        document.getElementById('clearBtn').textContent = langData.clearBtn;
+        document.getElementById('fillBtn').textContent = langData.fillBtn;
+        document.getElementById('presetsTitle').textContent = langData.presetsTitle;
+        document.getElementById('pyramidBtn').textContent = langData.pyramidBtn;
+        document.getElementById('checkerBtn').textContent = langData.checkerBtn;
+        document.getElementById('borderBtn').textContent = langData.borderBtn;
+        document.getElementById('editorTitle').textContent = langData.editorTitle;
+        document.getElementById('firstColorHint').textContent = langData.firstColorHint;
+        document.getElementById('generateBtn').textContent = langData.generateBtn;
+        document.getElementById('emailHint').textContent = langData.emailHint;
+        document.getElementById('langToggle').textContent = langData.langToggle;
+
+        // 更新placeholder
+        document.getElementById('cellValueLabel').placeholder = currentLang === 'zh' ? '0 is clear' : '0表示清除';
+    }
 
     // 初始化颜色选择器
     function initColorPalette() {
@@ -203,8 +293,8 @@
         const grid = document.getElementById('grid');
         grid.innerHTML = '';
 
-        rows = parseInt(document.getElementById('rows').value);
-        cols = parseInt(document.getElementById('cols').value);
+        rows = parseInt(rowsDom.value);
+        cols = parseInt(colsDom.value);
 
         // 重置网格数据
         gridData = Array(rows).fill().map(() => Array(cols).fill(0));
@@ -255,7 +345,6 @@
             cell.style.backgroundColor ="#fff";
             cell.textContent = '';
         }
-
     }
 
     // 生成关卡数据
@@ -349,16 +438,18 @@
     document.addEventListener('DOMContentLoaded', () => {
         initColorPalette();
         initGrid();
+        updateLanguage();
 
         // 事件监听
-        document.getElementById('rows').addEventListener('change', initGrid);
-        document.getElementById('cols').addEventListener('change', initGrid);
+        rowsDom.addEventListener('change', initGrid);
+        colsDom.addEventListener('change', initGrid);
         document.getElementById('generateBtn').addEventListener('click', generateLevelData);
         document.getElementById('clearBtn').addEventListener('click', clearGrid);
         document.getElementById('fillBtn').addEventListener('click', fillGrid);
         document.getElementById('pyramidBtn').addEventListener('click', pyramidPreset);
         document.getElementById('checkerBtn').addEventListener('click', checkerPreset);
         document.getElementById('borderBtn').addEventListener('click', borderPreset);
+        document.getElementById('langToggle').addEventListener('click', toggleLanguage);
 
         // 监听横屏变化
         window.addEventListener('resize', initGrid);
