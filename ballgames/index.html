@@ -646,46 +646,46 @@
     }
     // 启用陀螺仪控制挡板（仅移动端）
 
-    if (window.DeviceOrientationEvent && /Mobi|Android/i.test(navigator.userAgent)) {
-        enableGyroBtn.style.display = 'block'; // 显示按钮
-
-        enableGyroBtn.addEventListener('click', async () => {
-            // iOS 权限请求
-            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                try {
-                    const permission = await DeviceOrientationEvent.requestPermission();
-                    if (permission !== 'granted') {
-                        alert('请允许访问陀螺仪以使用该功能');
-                        return;
-                    }
-                } catch (e) {
-                    alert('无法启用陀螺仪: ' + e);
-                    return;
-                }
-            }
-
-            enableGyroBtn.style.display = 'none'; // 授权成功后隐藏按钮
-
-            let baselineGamma = null;
-
-            window.addEventListener('deviceorientation', event => {
-                const gamma = event.gamma;
-
-                if (baselineGamma === null) baselineGamma = gamma;
-
-                const relativeGamma = gamma - baselineGamma;
-                const sensitivity =2;
-                let deltaX = relativeGamma * sensitivity;
-
-                paddle.x += deltaX;
-                paddle.x = Math.max(0, Math.min(canvas.width - paddle.width, paddle.x));
-
-                if (!ball.inMotion) {
-                    ball.x = paddle.x + paddle.width / 2;
-                }
-            });
-        });
-    }
+    // if (window.DeviceOrientationEvent && /Mobi|Android/i.test(navigator.userAgent)) {
+    //     enableGyroBtn.style.display = 'block'; // 显示按钮
+    //
+    //     enableGyroBtn.addEventListener('click', async () => {
+    //         // iOS 权限请求
+    //         if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+    //             try {
+    //                 const permission = await DeviceOrientationEvent.requestPermission();
+    //                 if (permission !== 'granted') {
+    //                     alert('请允许访问陀螺仪以使用该功能');
+    //                     return;
+    //                 }
+    //             } catch (e) {
+    //                 alert('无法启用陀螺仪: ' + e);
+    //                 return;
+    //             }
+    //         }
+    //
+    //         enableGyroBtn.style.display = 'none'; // 授权成功后隐藏按钮
+    //
+    //         let baselineGamma = null;
+    //
+    //         window.addEventListener('deviceorientation', event => {
+    //             const gamma = event.gamma;
+    //
+    //             if (baselineGamma === null) baselineGamma = gamma;
+    //
+    //             const relativeGamma = gamma - baselineGamma;
+    //             const sensitivity =2;
+    //             let deltaX = relativeGamma * sensitivity;
+    //
+    //             paddle.x += deltaX;
+    //             paddle.x = Math.max(0, Math.min(canvas.width - paddle.width, paddle.x));
+    //
+    //             if (!ball.inMotion) {
+    //                 ball.x = paddle.x + paddle.width / 2;
+    //             }
+    //         });
+    //     });
+    // }
 
     // 菜单功能
     mobileMenuBtn.addEventListener('click', function () {
