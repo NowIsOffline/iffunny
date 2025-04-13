@@ -530,15 +530,23 @@
     function moveBall() {
         if (!ball.inMotion) return;
 
-        // ---- 水平方向移动 + 碰撞检测 ----
-        ball.x += ball.vx;
+        const angleNudge = 0.1;
+
+        // 预测下一帧位置
+        const nextX = ball.x + ball.vx;
+        const nextY = ball.y + ball.vy;
+
+        // 记录是否已发生碰撞（避免重复扣血）
+        let collided = false;
+
+        // ---- 检测砖块碰撞 ----
         for (let i = 0; i < blocks.length; i++) {
             const block = blocks[i];
             if (
-                ball.x + ball.radius > block.x &&
-                ball.x - ball.radius < block.x + blockWidth &&
-                ball.y + ball.radius > block.y &&
-                ball.y - ball.radius < block.y + blockHeight
+                nextX + ball.radius > block.x &&
+                nextX - ball.radius < block.x + blockWidth &&
+                nextY + ball.radius > block.y &&
+                nextY - ball.radius < block.y + blockHeight
             ) {
                 if (!block.indestructible) {
                     block.hits++;
@@ -546,45 +554,48 @@
                         blocks.splice(i, 1);
                     }
                 }
-                ball.vx *= -1;
-                playHitSound();
-                break;
-            }
-        }
 
-        // ---- 垂直方向移动 + 碰撞检测 ----
-        ball.y += ball.vy;
-        for (let i = 0; i < blocks.length; i++) {
-            const block = blocks[i];
-            if (
-                ball.x + ball.radius > block.x &&
-                ball.x - ball.radius < block.x + blockWidth &&
-                ball.y + ball.radius > block.y &&
-                ball.y - ball.radius < block.y + blockHeight
-            ) {
-                if (!block.indestructible) {
-                    block.hits++;
-                    if (block.hits >= block.maxHits) {
-                        blocks.splice(i, 1);
-                    }
+                // 计算更偏向水平 or 垂直碰撞
+                const overlapX = Math.min(nextX + ball.radius, block.x + blockWidth) - Math.max(nextX - ball.radius, block.x);
+                const overlapY = Math.min(nextY + ball.radius, block.y + blockHeight) - Math.max(nextY - ball.radius, block.y);
+
+                if (overlapX < overlapY) {
+                    ball.vx *= -1;
+                    ball.vx += (Math.random() - 0.5) * angleNudge;
+                } else {
+                    ball.vy *= -1;
+                    ball.vy += (Math.random() - 0.5) * angleNudge;
                 }
-                ball.vy *= -1;
+
                 playHitSound();
+                collided = true;
                 break;
             }
         }
 
-        // 墙壁碰撞
+        // 更新位置（注意：砖块反弹后再移动）
+        if (!collided) {
+            ball.x = nextX;
+            ball.y = nextY;
+        } else {
+            ball.x += ball.vx;
+            ball.y += ball.vy;
+        }
+
+        // ---- 墙壁碰撞 ----
         if (ball.x <= ball.radius || ball.x >= canvas.width - ball.radius) {
             ball.vx *= -1;
-            playHitSound();
-        }
-        if (ball.y <= ball.radius) {
-            ball.vy *= -1;
+            ball.vx += (Math.random() - 0.5) * angleNudge;
             playHitSound();
         }
 
-        // 挡板碰撞
+        if (ball.y <= ball.radius) {
+            ball.vy *= -1;
+            ball.vy += (Math.random() - 0.5) * angleNudge;
+            playHitSound();
+        }
+
+        // ---- 挡板碰撞 ----
         if (
             ball.y + ball.radius >= paddle.y &&
             ball.x >= paddle.x &&
@@ -600,19 +611,21 @@
             playHitSound();
         }
 
-        // 失误处理
+        // ---- 失误判断 ----
         if (ball.y - ball.radius > canvas.height) {
             missCount++;
             missCountDisplay.textContent = missCount;
             resetBall();
         }
 
-        // 通关判定
+        // ---- 通关判定 ----
         if (blocks.every(block => block.indestructible)) {
             soundWin.play();
             showLevelSelect();
         }
     }
+
+
 
     function playHitSound() {
         soundHit.currentTime = 0;

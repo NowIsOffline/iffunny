@@ -175,15 +175,9 @@
         <span id="emailHint">Send to me and your level might be included. My email: Offline2048@163.com</span>
     </div>
 </div>
-
+<script src="MainAndColor.js"></script>
 <script>
-    // 颜色配置
-    const COLORS = [
-        '#737171', '#FF0000', '#0000FF', '#FFFF00',
-        '#FF00FF', '#00FFFF', '#FF8000', '#8000FF',
-        '#0080FF', '#FF0080', '#80FF00', '#00FF80',
-        '#800000', '#008000', '#000080',
-    ];
+    
 
     // 当前选中的颜色ID
     let selectedColorIndex = 1;
@@ -263,7 +257,7 @@
         document.getElementById('langToggle').textContent = langData.langToggle;
 
         // 更新placeholder
-        document.getElementById('cellValueLabel').placeholder = currentLang === 'zh' ? '0 is clear' : '0表示清除';
+        document.getElementById('cellValue').placeholder = currentLang === 'zh' ? '0 is clear' : '0表示清除';
     }
 
     // 初始化颜色选择器
@@ -321,7 +315,7 @@
                     const value = parseInt(document.getElementById('cellValue').value);
                     // 更新数据和UI
                     if(value>0){
-                        gridData[i][j] = COLORS.length*selectedColorIndex+value;
+                        gridData[i][j] = COLORS.length*selectedColorIndex+(value);
                     }else{
                         gridData[i][j]=0;
                     }
@@ -405,7 +399,7 @@
             const end = center + i;
             for (let j = start; j <= end; j++) {
                 if (j >= 0 && j < cols) {
-                    gridData[i][j] = 2;
+                    gridData[i][j] = COLORS.length+2;
                 }
             }
         }
@@ -414,7 +408,7 @@
 
     // 预设：棋盘
     function checkerPreset() {
-        const value = parseInt(document.getElementById('cellValue').value);
+        const value =COLORS.length+ parseInt(document.getElementById('cellValue').value);
         for (let i = 0; i < rows; i++) {
             for (let j = 0; j < cols; j++) {
                 gridData[i][j] = (i + j) % 2 === 0 ? value : 0;
@@ -425,7 +419,7 @@
 
     // 预设：边框
     function borderPreset() {
-        const value = parseInt(document.getElementById('cellValue').value);
+        const value = COLORS.length+parseInt(document.getElementById('cellValue').value);
         for (let i = 0; i < rows; i++) {
             for (let j = 0; j < cols; j++) {
                 gridData[i][j] = (i === 0 || i === rows-1 || j === 0 || j === cols-1) ? value : 0;
