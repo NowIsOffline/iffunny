@@ -208,6 +208,20 @@
         #importLevelBtn:hover, #pcImportLevelBtn:hover {
             background: #3e8e41;
         }
+
+        /* 道具样式 */
+        .powerup {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -256,6 +270,7 @@
 <audio id="sound-launch" src="../sounds/sound-launch.wav"></audio>
 <audio id="sound-hit" src="../sounds/sound-hit.wav"></audio>
 <audio id="sound-win" src="../sounds/sound-win.wav"></audio>
+<audio id="sound-powerup" src="../sounds/sound-win.wav"></audio>
 <script src="MainAndColor.js"></script>
 <script>
     // 国际化支持
@@ -317,6 +332,177 @@
         updateLanguage();
     });
 
+    // Ball class
+    class Ball {
+        constructor(paddle) {
+            this.radius = 8;
+            this.speed = 3;
+            this.inMotion = false;
+            this.reset(paddle);
+        }
+
+        reset(paddle) {
+            this.inMotion = false;
+            this.x = paddle.x + paddle.width / 2;
+            this.y = paddle.y - this.radius - 1;
+            this.vx = 0;
+            this.vy = 0;
+        }
+
+        launch(angle) {
+            this.vx = Math.cos(angle) * this.speed;
+            this.vy = Math.sin(angle) * this.speed;
+            this.inMotion = true;
+            soundLaunch.currentTime = 0;
+            soundLaunch.play();
+        }
+
+        draw(ctx) {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = 'white';
+            ctx.fill();
+        }
+
+        move(paddle, blocks, canvas, missCountDisplay) {
+            if (!this.inMotion) return false;
+
+            const angleNudge = 0.1;
+            let missed = false;
+            let collided = false;
+
+            // Predict next position
+            const nextX = this.x + this.vx;
+            const nextY = this.y + this.vy;
+
+            // ---- Block collisions ----
+            for (let i = 0; i < blocks.length; i++) {
+                const block = blocks[i];
+                if (
+                    nextX + this.radius > block.x &&
+                    nextX - this.radius < block.x + blockWidth &&
+                    nextY + this.radius > block.y &&
+                    nextY - this.radius < block.y + blockHeight
+                ) {
+                    if (!block.indestructible) {
+                        block.hits++;
+                        if (block.hits >= block.maxHits) {
+                            blocks.splice(i, 1);
+                            // 随机掉落道具
+                            if (Math.random() < 0.2) { // 20%几率掉落道具
+                                createPowerUp(block.x + blockWidth/2, block.y + blockHeight/2);
+                            }
+                        }
+                    }
+
+                    // Determine collision direction
+                    const overlapX = Math.min(nextX + this.radius, block.x + blockWidth) - Math.max(nextX - this.radius, block.x);
+                    const overlapY = Math.min(nextY + this.radius, block.y + blockHeight) - Math.max(nextY - this.radius, block.y);
+
+                    if (overlapX < overlapY) {
+                        this.vx *= -1;
+                        this.vx += (Math.random() - 0.5) * angleNudge;
+                    } else {
+                        this.vy *= -1;
+                        this.vy += (Math.random() - 0.5) * angleNudge;
+                    }
+
+                    playHitSound();
+                    collided = true;
+                    break;
+                }
+            }
+
+            // Update position
+            if (!collided) {
+                this.x = nextX;
+                this.y = nextY;
+            } else {
+                this.x += this.vx;
+                this.y += this.vy;
+            }
+
+            // ---- Wall collisions ----
+            if (this.x <= this.radius || this.x >= canvas.width - this.radius) {
+                this.vx *= -1;
+                this.vx += (Math.random() - 0.5) * angleNudge;
+                playHitSound();
+            }
+
+            if (this.y <= this.radius) {
+                this.vy *= -1;
+                this.vy += (Math.random() - 0.5) * angleNudge;
+                playHitSound();
+            }
+
+            // ---- Paddle collision ----
+            if (
+                this.y + this.radius >= paddle.y &&
+                this.x >= paddle.x &&
+                this.x <= paddle.x + paddle.width &&
+                this.vy > 0
+            ) {
+                const hit = (this.x - paddle.x) / paddle.width - 0.5;
+                const angle = hit * Math.PI / 2;
+                this.vx = this.speed * Math.sin(angle);
+                this.vy = -Math.abs(this.speed * Math.cos(angle));
+                this.y = paddle.y - this.radius - 1;
+                playHitSound();
+            }
+
+            // ---- Miss check ----
+            if (this.y - this.radius > canvas.height) {
+                missed = true;
+            }
+
+            return missed;
+        }
+    }
+
+    // 道具类
+    class PowerUp {
+        constructor(x, y, type) {
+            this.x = x;
+            this.y = y;
+            this.type = type; // 1: 分裂球, 2: 增加挡板长度
+            this.width = 20;
+            this.height = 20;
+            this.speed = 2;
+            this.active = true;
+            this.color = type === 1 ? '#FF5733' : '#33FF57';
+            this.text = type === 1 ? 'S' : 'L';
+        }
+
+        update() {
+            this.y += this.speed;
+        }
+
+        draw(ctx) {
+            if (!this.active) return;
+
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.width/2, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+
+            ctx.fillStyle = 'white';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(this.text, this.x, this.y + 4);
+        }
+
+        checkCollision(paddle) {
+            if (!this.active) return false;
+
+            return (
+                this.x + this.width/2 > paddle.x &&
+                this.x - this.width/2 < paddle.x + paddle.width &&
+                this.y + this.height/2 > paddle.y &&
+                this.y - this.height/2 < paddle.y + paddle.height
+            );
+        }
+    }
+
     // 游戏主逻辑
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
@@ -336,6 +522,101 @@
     const importLevelBtn = document.getElementById('importLevelBtn');
     const pcImportLevelBtn = document.getElementById('pcImportLevelBtn');
     let missCount = 0;
+
+    // 音效
+    const soundLaunch = document.getElementById('sound-launch');
+    const soundHit = document.getElementById('sound-hit');
+    const soundWin = document.getElementById('sound-win');
+    const soundPowerup = document.getElementById('sound-powerup');
+    soundWin.addEventListener("ended", function () {
+        this.pause();
+        this.currentTime = 0;
+    });
+
+    // 挡板
+    const paddle = {
+        width: 100,
+        height: 15,
+        x: (canvas.width - 100) / 2,
+        y: canvas.height - 20,
+        color: '#6ea0f8',
+        originalWidth: 100, // 原始宽度
+        powerUpTime: 0 // 道具生效时间
+    };
+
+    // 多个小球
+    let balls = [new Ball(paddle)];
+    const maxBalls = 3; // 最大球数
+
+    // 方块和关卡配置
+    const blockWidth = 24;
+    const blockHeight = 16;
+    const gap = 2;
+    let blocks = [];
+
+    // 道具
+    let powerUps = [];
+    let currentLevel = 0;
+
+    // 创建道具
+    function createPowerUp(x, y) {
+        const type = Math.random() < 0.5 ? 1 : 2; // 50%几率分裂球，50%几率增加挡板长度
+        powerUps.push(new PowerUp(x, y, type));
+    }
+
+    // 应用道具效果
+    function applyPowerUp(type) {
+        soundPowerup.currentTime = 0;
+        soundPowerup.play();
+
+        if (type === 1) { // 分裂球
+            const activeBalls = balls.filter(ball => ball.inMotion);
+            const newBalls = [];
+
+            activeBalls.forEach(ball => {
+                if (newBalls.length + balls.length < maxBalls) {
+                    const newBall = new Ball(paddle);
+                    newBall.x = ball.x;
+                    newBall.y = ball.y;
+                    newBall.inMotion = true;
+                    newBall.vx = -ball.vx * 0.8; // 反向且稍慢
+                    newBall.vy = ball.vy * 0.8;
+                    newBalls.push(newBall);
+                }
+            });
+
+            balls = balls.concat(newBalls);
+        } else if (type === 2) { // 增加挡板长度
+            paddle.width = paddle.originalWidth * 1.5; // 增加50%长度
+            paddle.powerUpTime = Date.now() + 30000; // 30秒后恢复
+        }
+    }
+
+    // 更新道具状态
+    function updatePowerUps() {
+        // 更新道具位置并检测碰撞
+        for (let i = powerUps.length - 1; i >= 0; i--) {
+            const powerUp = powerUps[i];
+            powerUp.update();
+
+            if (powerUp.checkCollision(paddle)) {
+                applyPowerUp(powerUp.type);
+                powerUps.splice(i, 1);
+            } else if (powerUp.y > canvas.height) {
+                powerUps.splice(i, 1);
+            }
+        }
+
+        // 检查挡板长度道具是否过期
+        if (paddle.width > paddle.originalWidth && Date.now() > paddle.powerUpTime) {
+            paddle.width = paddle.originalWidth;
+        }
+    }
+
+    // 绘制道具
+    function drawPowerUps() {
+        powerUps.forEach(powerUp => powerUp.draw(ctx));
+    }
 
     // 导入关卡功能
     function importLevel() {
@@ -372,42 +653,10 @@
     importLevelBtn.addEventListener('click', importLevel);
     pcImportLevelBtn.addEventListener('click', importLevel);
 
-    // 音效
-    const soundLaunch = document.getElementById('sound-launch');
-    const soundHit = document.getElementById('sound-hit');
-    const soundWin = document.getElementById('sound-win');
-    soundWin.addEventListener("ended", function () {
-        this.pause();
-        this.currentTime = 0;
-    });
-
-    // 挡板
-    const paddle = {
-        width: 100,
-        height: 15,
-        x: (canvas.width - 100) / 2,
-        y: canvas.height - 20,
-        color: '#6ea0f8'
-    };
-
-    // 小球
-    const ball = {
-        x: paddle.x + paddle.width / 2,
-        y: paddle.y - 9,
-        radius: 8,
-        vx: 0,
-        vy: 0,
-        speed: 3,
-        inMotion: false
-    };
-
-    // 方块和关卡配置
-    const blockWidth = 24;
-    const blockHeight = 16;
-    const gap = 2;
-    let blocks = [];
-
-    let currentLevel = 0;
+    function playHitSound() {
+        soundHit.currentTime = 0;
+        soundHit.play();
+    }
 
     // 创建关卡选择按钮
     function createLevelButtons() {
@@ -428,8 +677,16 @@
         currentLevel = levelIndex;
         levelSelect.style.display = 'none';
         createBlocksFromLevel(levels[currentLevel]);
-        resetBall();
+        resetBalls();
+        powerUps = []; // 清空道具
         resizeCanvas();
+    }
+
+    // 重置所有球
+    function resetBalls() {
+        balls = [new Ball(paddle)];
+        missCount = 0;
+        missCountDisplay.textContent = missCount;
     }
 
     // 显示关卡选择界面
@@ -454,9 +711,10 @@
         }
 
         // 调整挡板和小球位置
-        paddle.width = canvas.width * 0.15;
+        paddle.originalWidth = canvas.width * 0.15;
+        paddle.width = paddle.originalWidth;
         paddle.y = canvas.height - 30;
-        resetBall();
+        resetBalls();
 
         // 重新创建方块以适应新尺寸
         if (levels[currentLevel]) {
@@ -511,181 +769,60 @@
         ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
     }
 
-    function drawBall() {
-        ctx.beginPath();
-        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'white';
-        ctx.fill();
-    }
-
-    function resetBall() {
-        ball.inMotion = false;
-        ball.x = paddle.x + paddle.width / 2;
-        ball.y = paddle.y - ball.radius - 1;
-        ball.vx = 0;
-        ball.vy = 0;
-    }
-
-
-    function moveBall() {
-        if (!ball.inMotion) return;
-
-        const angleNudge = 0.1;
-
-        // 预测下一帧位置
-        const nextX = ball.x + ball.vx;
-        const nextY = ball.y + ball.vy;
-
-        // 记录是否已发生碰撞（避免重复扣血）
-        let collided = false;
-
-        // ---- 检测砖块碰撞 ----
-        for (let i = 0; i < blocks.length; i++) {
-            const block = blocks[i];
-            if (
-                nextX + ball.radius > block.x &&
-                nextX - ball.radius < block.x + blockWidth &&
-                nextY + ball.radius > block.y &&
-                nextY - ball.radius < block.y + blockHeight
-            ) {
-                if (!block.indestructible) {
-                    block.hits++;
-                    if (block.hits >= block.maxHits) {
-                        blocks.splice(i, 1);
-                    }
-                }
-
-                // 计算更偏向水平 or 垂直碰撞
-                const overlapX = Math.min(nextX + ball.radius, block.x + blockWidth) - Math.max(nextX - ball.radius, block.x);
-                const overlapY = Math.min(nextY + ball.radius, block.y + blockHeight) - Math.max(nextY - ball.radius, block.y);
-
-                if (overlapX < overlapY) {
-                    ball.vx *= -1;
-                    ball.vx += (Math.random() - 0.5) * angleNudge;
-                } else {
-                    ball.vy *= -1;
-                    ball.vy += (Math.random() - 0.5) * angleNudge;
-                }
-
-                playHitSound();
-                collided = true;
-                break;
-            }
-        }
-
-        // 更新位置（注意：砖块反弹后再移动）
-        if (!collided) {
-            ball.x = nextX;
-            ball.y = nextY;
-        } else {
-            ball.x += ball.vx;
-            ball.y += ball.vy;
-        }
-
-        // ---- 墙壁碰撞 ----
-        if (ball.x <= ball.radius || ball.x >= canvas.width - ball.radius) {
-            ball.vx *= -1;
-            ball.vx += (Math.random() - 0.5) * angleNudge;
-            playHitSound();
-        }
-
-        if (ball.y <= ball.radius) {
-            ball.vy *= -1;
-            ball.vy += (Math.random() - 0.5) * angleNudge;
-            playHitSound();
-        }
-
-        // ---- 挡板碰撞 ----
-        if (
-            ball.y + ball.radius >= paddle.y &&
-            ball.x >= paddle.x &&
-            ball.x <= paddle.x + paddle.width &&
-            ball.vy > 0
-        ) {
-            const hit = (ball.x - paddle.x) / paddle.width - 0.5;
-            const angle = hit * Math.PI / 2;
-            const speed = ball.speed;
-            ball.vx = speed * Math.sin(angle);
-            ball.vy = -Math.abs(speed * Math.cos(angle));
-            ball.y = paddle.y - ball.radius - 1;
-            playHitSound();
-        }
-
-        // ---- 失误判断 ----
-        if (ball.y - ball.radius > canvas.height) {
-            missCount++;
-            missCountDisplay.textContent = missCount;
-            resetBall();
-        }
-
-        // ---- 通关判定 ----
-        if (blocks.every(block => block.indestructible)) {
-            soundWin.play();
-            showLevelSelect();
-        }
-    }
-
-
-
-    function playHitSound() {
-        soundHit.currentTime = 0;
-        soundHit.play();
+    function drawBalls() {
+        balls.forEach(ball => ball.draw(ctx));
     }
 
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawBlocks();
         drawPaddle();
-        drawBall();
+        drawBalls();
+        drawPowerUps();
+    }
+
+    function moveBalls() {
+        let activeBalls = 0;
+
+        // Move all balls and check for misses
+        balls.forEach(ball => {
+            const missed = ball.move(paddle, blocks, canvas, missCountDisplay);
+            if (missed) {
+                // Remove missed balls
+                const index = balls.indexOf(ball);
+                if (index !== -1) {
+                    balls.splice(index, 1);
+                }
+            } else {
+                activeBalls++;
+            }
+        });
+
+        // If all balls are missed
+        if (balls.length === 0) {
+            missCount++;
+            missCountDisplay.textContent = missCount;
+            balls.push(new Ball(paddle));
+
+            // Add new balls when certain conditions are met (e.g., every 5 misses)
+            if (missCount % 5 === 0 && balls.length < maxBalls) {
+                balls.push(new Ball(paddle));
+            }
+        }
+
+        // Check win condition
+        if (blocks.every(block => block.indestructible)) {
+            soundWin.play();
+            showLevelSelect();
+        }
     }
 
     function loop() {
         draw();
-        moveBall();
+        moveBalls();
+        updatePowerUps();
         requestAnimationFrame(loop);
     }
-    // 启用陀螺仪控制挡板（仅移动端）
-
-    // if (window.DeviceOrientationEvent && /Mobi|Android/i.test(navigator.userAgent)) {
-    //     enableGyroBtn.style.display = 'block'; // 显示按钮
-    //
-    //     enableGyroBtn.addEventListener('click', async () => {
-    //         // iOS 权限请求
-    //         if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-    //             try {
-    //                 const permission = await DeviceOrientationEvent.requestPermission();
-    //                 if (permission !== 'granted') {
-    //                     alert('请允许访问陀螺仪以使用该功能');
-    //                     return;
-    //                 }
-    //             } catch (e) {
-    //                 alert('无法启用陀螺仪: ' + e);
-    //                 return;
-    //             }
-    //         }
-    //
-    //         enableGyroBtn.style.display = 'none'; // 授权成功后隐藏按钮
-    //
-    //         let baselineGamma = null;
-    //
-    //         window.addEventListener('deviceorientation', event => {
-    //             const gamma = event.gamma;
-    //
-    //             if (baselineGamma === null) baselineGamma = gamma;
-    //
-    //             const relativeGamma = gamma - baselineGamma;
-    //             const sensitivity =2;
-    //             let deltaX = relativeGamma * sensitivity;
-    //
-    //             paddle.x += deltaX;
-    //             paddle.x = Math.max(0, Math.min(canvas.width - paddle.width, paddle.x));
-    //
-    //             if (!ball.inMotion) {
-    //                 ball.x = paddle.x + paddle.width / 2;
-    //             }
-    //         });
-    //     });
-    // }
 
     // 菜单功能
     mobileMenuBtn.addEventListener('click', function () {
@@ -711,7 +848,7 @@
     pcHomeBtn.addEventListener('click', function () {
         window.location.href = "https://iffunny.com/";
     });
-    
+
     // 返回主页按钮
     createMapBtn.addEventListener('click', function () {
         mobileMenu.classList.remove('show');
@@ -730,17 +867,16 @@
     });
 
     canvas.addEventListener('click', e => {
-        if (!ball.inMotion) {
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const angle = Math.atan2(y - ball.y, x - ball.x);
-            ball.vx = Math.cos(angle) * ball.speed;
-            ball.vy = Math.sin(angle) * ball.speed;
-            ball.inMotion = true;
-            soundLaunch.currentTime = 0;
-            soundLaunch.play();
-        }
+        // Launch all balls that aren't in motion
+        balls.forEach(ball => {
+            if (!ball.inMotion) {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const angle = Math.atan2(y - ball.y, x - ball.x);
+                ball.launch(angle);
+            }
+        });
     });
 
     function handlePointerMove(clientX) {
@@ -749,9 +885,12 @@
         x = Math.max(0, Math.min(x, canvas.width - paddle.width));
         paddle.x = x;
 
-        if (!ball.inMotion) {
-            ball.x = paddle.x + paddle.width / 2;
-        }
+        // Update all balls that aren't in motion
+        balls.forEach(ball => {
+            if (!ball.inMotion) {
+                ball.x = paddle.x + paddle.width / 2;
+            }
+        });
     }
 
     // 使用requestAnimationFrame节流
