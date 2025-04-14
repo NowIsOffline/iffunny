@@ -809,6 +809,12 @@
             ctx.fillRect(block.x, block.y, blockWidth, blockHeight);
 
             if (!block.indestructible) {
+                ctx.strokeStyle = "black";
+                ctx.lineWidth=2;
+                ctx.strokeText(   (block.maxHits - block.hits).toString(),
+                    block.x + blockWidth / 2,
+                    block.y + blockHeight / 2 + 3
+                );
                 ctx.fillStyle = 'white';
                 ctx.font = '10px Arial';
                 ctx.textAlign = 'center';
@@ -817,6 +823,7 @@
                     block.x + blockWidth / 2,
                     block.y + blockHeight / 2 + 3
                 );
+               
             }
         });
     }
