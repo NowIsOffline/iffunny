@@ -336,7 +336,7 @@
     class Ball {
         constructor(paddle) {
             this.radius = 8;
-            this.speed = 3;
+            this.speed = 4;
             this.inMotion = false;
             this.reset(paddle);
         }
@@ -371,88 +371,145 @@
             let missed = false;
             let collided = false;
 
-            // Predict next position
-            const nextX = this.x + this.vx;
-            const nextY = this.y + this.vy;
+            // 改进的碰撞检测 - 使用更小的步长
+            const steps = Math.max(Math.abs(this.vx), Math.abs(this.vy)) + 1;
+            const stepX = this.vx / steps;
+            const stepY = this.vy / steps;
 
-            // ---- Block collisions ----
-            for (let i = 0; i < blocks.length; i++) {
-                const block = blocks[i];
-                if (
-                    nextX + this.radius > block.x &&
-                    nextX - this.radius < block.x + blockWidth &&
-                    nextY + this.radius > block.y &&
-                    nextY - this.radius < block.y + blockHeight
-                ) {
-                    if (!block.indestructible) {
-                        block.hits++;
-                        if (block.hits >= block.maxHits) {
-                            blocks.splice(i, 1);
-                            // 随机掉落道具
-                            if (Math.random() < 0.2) { // 20%几率掉落道具
-                                createPowerUp(block.x + blockWidth/2, block.y + blockHeight/2);
+            for (let i = 0; i < steps; i++) {
+                const nextX = this.x + stepX;
+                const nextY = this.y + stepY;
+
+                // ---- Block collisions ----
+                for (let j = 0; j < blocks.length; j++) {
+                    const block = blocks[j];
+
+                    // 改进的AABB碰撞检测
+                    if (
+                        nextX + this.radius > block.x &&
+                        nextX - this.radius < block.x + blockWidth &&
+                        nextY + this.radius > block.y &&
+                        nextY - this.radius < block.y + blockHeight
+                    ) {
+                        if (!block.indestructible) {
+                            block.hits++;
+                            if (block.hits >= block.maxHits) {
+                                blocks.splice(j, 1);
+                                // 随机掉落道具
+                                if (Math.random() < 0.2) { // 20%几率掉落道具
+                                    createPowerUp(block.x + blockWidth/2, block.y + blockHeight/2);
+                                }
                             }
                         }
-                    }
 
-                    // Determine collision direction
-                    const overlapX = Math.min(nextX + this.radius, block.x + blockWidth) - Math.max(nextX - this.radius, block.x);
-                    const overlapY = Math.min(nextY + this.radius, block.y + blockHeight) - Math.max(nextY - this.radius, block.y);
+                        // 更精确的碰撞方向检测
+                        const ballRight = nextX + this.radius;
+                        const ballLeft = nextX - this.radius;
+                        const ballBottom = nextY + this.radius;
+                        const ballTop = nextY - this.radius;
 
-                    if (overlapX < overlapY) {
-                        this.vx *= -1;
+                        const blockRight = block.x + blockWidth;
+                        const blockLeft = block.x;
+                        const blockBottom = block.y + blockHeight;
+                        const blockTop = block.y;
+
+                        // 计算各边的重叠量
+                        const overlapLeft = ballRight - blockLeft;
+                        const overlapRight = blockRight - ballLeft;
+                        const overlapTop = ballBottom - blockTop;
+                        const overlapBottom = blockBottom - ballTop;
+
+                        // 找出最小的重叠方向
+                        const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+
+                        // 根据最小重叠方向反弹
+                        if (minOverlap === overlapLeft) {
+                            this.vx = -Math.abs(this.vx);
+                            this.x = blockLeft - this.radius;
+                        } else if (minOverlap === overlapRight) {
+                            this.vx = Math.abs(this.vx);
+                            this.x = blockRight + this.radius;
+                        } else if (minOverlap === overlapTop) {
+                            this.vy = -Math.abs(this.vy);
+                            this.y = blockTop - this.radius;
+                        } else if (minOverlap === overlapBottom) {
+                            this.vy = Math.abs(this.vy);
+                            this.y = blockBottom + this.radius;
+                        }
+
                         this.vx += (Math.random() - 0.5) * angleNudge;
-                    } else {
-                        this.vy *= -1;
                         this.vy += (Math.random() - 0.5) * angleNudge;
+
+                        // 确保最小垂直速度，防止球水平移动
+                        if (Math.abs(this.vy) < 1) {
+                            this.vy = this.vy < 0 ? -1 : 1;
+                        }
+
+                        playHitSound();
+                        collided = true;
+                        break;
+                    }
+                }
+
+                if (collided) break;
+
+                // 更新位置
+                this.x = nextX;
+                this.y = nextY;
+
+                // ---- Wall collisions ----
+                // 改进的边缘碰撞检测，确保球不会卡在边缘
+                if (this.x <= this.radius) {
+                    this.vx = Math.abs(this.vx);
+                    this.x = this.radius + 1; // 确保球被推出边缘
+                    this.vx += (Math.random() - 0.5) * angleNudge;
+                    playHitSound();
+                    break;
+                }
+
+                if (this.x >= canvas.width - this.radius) {
+                    this.vx = -Math.abs(this.vx);
+                    this.x = canvas.width - this.radius - 1; // 确保球被推出边缘
+                    this.vx += (Math.random() - 0.5) * angleNudge;
+                    playHitSound();
+                    break;
+                }
+
+                if (this.y <= this.radius) {
+                    this.vy = Math.abs(this.vy);
+                    this.y = this.radius + 1; // 确保球被推出边缘
+                    this.vy += (Math.random() - 0.5) * angleNudge;
+                    playHitSound();
+                    break;
+                }
+
+                // ---- Paddle collision ----
+                if (
+                    this.y + this.radius >= paddle.y &&
+                    this.x >= paddle.x &&
+                    this.x <= paddle.x + paddle.width &&
+                    this.vy > 0
+                ) {
+                    const hit = (this.x - paddle.x) / paddle.width - 0.5;
+                    const angle = hit * Math.PI / 2;
+                    this.vx = this.speed * Math.sin(angle);
+                    this.vy = -Math.abs(this.speed * Math.cos(angle));
+                    this.y = paddle.y - this.radius - 1;
+
+                    // 确保最小垂直速度，防止球水平移动
+                    if (Math.abs(this.vy) < 1) {
+                        this.vy = -1;
                     }
 
                     playHitSound();
-                    collided = true;
                     break;
                 }
-            }
 
-            // Update position
-            if (!collided) {
-                this.x = nextX;
-                this.y = nextY;
-            } else {
-                this.x += this.vx;
-                this.y += this.vy;
-            }
-
-            // ---- Wall collisions ----
-            if (this.x <= this.radius || this.x >= canvas.width - this.radius) {
-                this.vx *= -1;
-                this.vx += (Math.random() - 0.5) * angleNudge;
-                playHitSound();
-            }
-
-            if (this.y <= this.radius) {
-                this.vy *= -1;
-                this.vy += (Math.random() - 0.5) * angleNudge;
-                playHitSound();
-            }
-
-            // ---- Paddle collision ----
-            if (
-                this.y + this.radius >= paddle.y &&
-                this.x >= paddle.x &&
-                this.x <= paddle.x + paddle.width &&
-                this.vy > 0
-            ) {
-                const hit = (this.x - paddle.x) / paddle.width - 0.5;
-                const angle = hit * Math.PI / 2;
-                this.vx = this.speed * Math.sin(angle);
-                this.vy = -Math.abs(this.speed * Math.cos(angle));
-                this.y = paddle.y - this.radius - 1;
-                playHitSound();
-            }
-
-            // ---- Miss check ----
-            if (this.y - this.radius > canvas.height) {
-                missed = true;
+                // ---- Miss check ----
+                if (this.y - this.radius > canvas.height) {
+                    missed = true;
+                    break;
+                }
             }
 
             return missed;
