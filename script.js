@@ -257,12 +257,6 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-startButton.onclick = () => {
-    startScreen.style.display = 'none';
-    // createClouds(); // 加上这一行
-    spawnNextGroup();
-    gameLoop();
-};
 
 
 window.addEventListener('keydown', (e) => {
@@ -270,13 +264,17 @@ window.addEventListener('keydown', (e) => {
     const key = e.key.toLowerCase();
     if (['a', 'd', 's'].includes(key) && !moveTimers[key]) {
         moveTimers[key] = setInterval(() => {
-            if(!currentGroup) return;
-            if (key === 'a') currentGroup.move(-1, 0);
-            if (key === 'd') currentGroup.move(1, 0);
-            if (key === 's') currentGroup.move(0, 1);
+            moveGroup(key);
         }, moveInterval);
     }
 });
+
+function moveGroup(key){
+    if(!currentGroup) return;
+    if (key === 'a') currentGroup.move(-1, 0);
+    if (key === 'd') currentGroup.move(1, 0);
+    if (key === 's') currentGroup.move(0, 1);
+}
 
 window.addEventListener('keyup', (e) => {
     const key = e.key.toLowerCase();
@@ -292,18 +290,7 @@ gameArea.addEventListener('click', (e) => {
     currentGroup.rotate();
 });
 
-function createClouds() {
-    for (let i = 0; i < 5; i++) {
-        const cloud = document.createElement('div');
-        cloud.className = 'cloud';
-        cloud.style.width = `${100 + Math.random() * 100}px`;
-        cloud.style.height = `${60 + Math.random() * 40}px`;
-        cloud.style.top = `${Math.random() * 50}vh`;
-        cloud.style.left = `-${Math.random() * 200}px`;
-        cloud.style.animationDuration = `${50 + Math.random() * 30}s`;
-        gameArea.appendChild(cloud);
-    }
-}
+
 const infoBox = document.getElementById('info-box');
 const infoLogo = document.getElementById('info-logo');
 const infoTitle = document.getElementById('info-title');
@@ -341,3 +328,173 @@ function hideInfo() {
     infoBox.style.display = 'none';
 }
 
+
+// 在文件顶部添加这些变量
+let joystickBase = null;
+let joystickHandle = null;
+let joystickActive = false;
+let joystickStartX = 0;
+let joystickStartY = 0;
+let joystickX = 0;
+let joystickY = 0;
+const joystickRadius = 60;
+const joystickDeadZone = 20;
+
+// 添加摇杆初始化函数
+function initJoystick() {
+    // 创建摇杆基础
+    joystickBase = document.createElement('div');
+    joystickBase.id = 'joystick-base';
+    joystickBase.style.position = 'fixed';
+    joystickBase.style.bottom = '100px';
+    joystickBase.style.left = '50%';
+    joystickBase.style.transform = 'translateX(-50%)';
+    joystickBase.style.width = joystickRadius * 2 + 'px';
+    joystickBase.style.height = joystickRadius * 2 + 'px';
+    joystickBase.style.borderRadius = '50%';
+    joystickBase.style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
+    joystickBase.style.display = 'none'; // 默认隐藏
+    joystickBase.style.zIndex = '1000';
+    document.body.appendChild(joystickBase);
+
+    // 创建摇杆手柄
+    joystickHandle = document.createElement('div');
+    joystickHandle.id = 'joystick-handle';
+    joystickHandle.style.position = 'absolute';
+    joystickHandle.style.width = '40px';
+    joystickHandle.style.height = '40px';
+    joystickHandle.style.borderRadius = '50%';
+    joystickHandle.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+    joystickHandle.style.transform = 'translate(-50%, -50%)';
+    joystickHandle.style.top = '50%';
+    joystickHandle.style.left = '50%';
+    joystickBase.appendChild(joystickHandle);
+
+    // 检查是否是移动设备
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+        joystickBase.style.display = 'block';
+    }
+
+    // 添加触摸事件
+    joystickBase.addEventListener('touchstart', handleJoystickStart);
+    document.addEventListener('touchmove', handleJoystickMove);
+    document.addEventListener('touchend', handleJoystickEnd);
+}
+
+// 摇杆事件处理函数
+function handleJoystickStart(e) {
+    // e.preventDefault();
+    const touch = e.touches[0];
+    const rect = joystickBase.getBoundingClientRect();
+    joystickStartX = rect.left + joystickRadius;
+    joystickStartY = rect.top + joystickRadius;
+    joystickActive = true;
+    updateJoystick(touch.clientX, touch.clientY);
+}
+
+function handleJoystickMove(e) {
+    if (!joystickActive||!e) return;
+    // e.preventDefault();
+    const touch = e.touches[0];
+    updateJoystick(touch.clientX, touch.clientY);
+}
+
+function handleJoystickEnd(e) {
+    joystickActive = false;
+    joystickX = 0;
+    joystickY = 0;
+    joystickHandle.style.top = '50%';
+    joystickHandle.style.left = '50%';
+}
+
+function updateJoystick(x, y) {
+    if (!joystickActive) return;
+
+    // 计算摇杆偏移
+    const dx = x - joystickStartX;
+    const dy = y - joystickStartY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // 限制摇杆移动范围
+    let angle = Math.atan2(dy, dx);
+    let limitedDistance = Math.min(distance, joystickRadius);
+
+    // 更新摇杆手柄位置
+    const handleX = joystickStartX + Math.cos(angle) * limitedDistance;
+    const handleY = joystickStartY + Math.sin(angle) * limitedDistance;
+
+    joystickHandle.style.left = (Math.cos(angle) * limitedDistance + joystickRadius) + 'px';
+    joystickHandle.style.top = (Math.sin(angle) * limitedDistance + joystickRadius) + 'px';
+
+    // 计算摇杆方向
+    if (distance > joystickDeadZone) {
+        joystickX = Math.cos(angle);
+        joystickY = Math.sin(angle);
+    } else {
+        joystickX = 0;
+        joystickY = 0;
+    }
+}
+let joystickLastMoveTime = 0;
+const joystickMoveInterval = 100; // 摇杆移动间隔时间（毫秒）
+
+// 修改游戏循环以处理摇杆输入
+function gameLoop() {
+    const now = Date.now();
+    if (currentGroup) {
+        currentGroup.fall();
+        // 处理摇杆输入
+        if(now - joystickLastMoveTime > joystickMoveInterval){
+            if (joystickActive && Math.abs(joystickX) > 0.3) {
+                moveGroup(joystickX > 0 ? "d" : "a")
+            }
+            if (joystickActive && joystickY > 0.7) {
+                moveGroup("s")
+            }
+            joystickLastMoveTime = now;
+        }
+       
+    }
+    requestAnimationFrame(gameLoop);
+}
+
+// 添加旋转按钮
+function initMobileControls() {
+    const rotateBtn = document.createElement('div');
+    rotateBtn.id = 'rotate-btn';
+    rotateBtn.textContent = '↻';
+    rotateBtn.style.position = 'fixed';
+    rotateBtn.style.right = '30px';
+    rotateBtn.style.bottom = '100px';
+    rotateBtn.style.width = '60px';
+    rotateBtn.style.height = '60px';
+    rotateBtn.style.borderRadius = '50%';
+    rotateBtn.style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
+    rotateBtn.style.display = 'flex';
+    rotateBtn.style.justifyContent = 'center';
+    rotateBtn.style.alignItems = 'center';
+    rotateBtn.style.fontSize = '30px';
+    rotateBtn.style.color = 'white';
+    rotateBtn.style.zIndex = '1000';
+
+    // 检查是否是移动设备
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+        document.body.appendChild(rotateBtn);
+    }
+
+    rotateBtn.addEventListener('touchstart', (e) => {
+        // e.preventDefault();
+        if (currentGroup) currentGroup.rotate();
+    });
+}
+
+// 在startButton.onclick中调用initMobileControls
+startButton.onclick = () => {
+    startScreen.style.display = 'none';
+    spawnNextGroup();
+    gameLoop();
+    initJoystick();
+    initMobileControls(); // 初始化移动控制
+};
