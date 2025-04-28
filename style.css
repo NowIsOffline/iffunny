@@ -1,0 +1,140 @@
+body {
+    margin: 0;
+    overflow: hidden;
+    background: linear-gradient(to top, #a8edea, #fed6e3); /* 更卡通渐变 */
+    font-family: 'Comic Sans MS', cursive;
+}
+
+#game-area {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(to top, #a8edea, #fed6e3);
+    overflow: hidden;
+}
+
+.cloud {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.8;
+    animation: floatCloud 60s linear infinite;
+}
+
+@keyframes floatCloud {
+    0% { transform: translateX(-200px); }
+    100% { transform: translateX(120vw); }
+}
+
+#start-screen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(#81d4fa, #e1f5fe);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    z-index: 10;
+}
+
+#start-button {
+    padding: 15px 30px;
+    font-size: 24px;
+    background: #ffb74d;
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 5px #ef6c00;
+    cursor: pointer;
+    color: white;
+}
+
+#start-button:active {
+    box-shadow: none;
+    transform: translateY(5px);
+}
+
+
+.cell {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #ffd54f;
+    border: 2px solid #fff;
+    box-sizing: border-box;
+    position: absolute;
+    transition: top 0.1s linear, left 0.1s linear;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0px 2px 5px rgba(0,0,0,0.2);
+}
+
+.cell img {
+    width: 70%;
+    height: 70%;
+    pointer-events: none;
+    border-radius: 5px;
+}
+#info-box {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid #000;
+    border-radius: 10px;
+    padding: 10px;
+    pointer-events: auto;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: opacity 0.3s ease;
+    opacity: 0;
+    z-index: 1000;
+    width: 200px;
+    font-family: 'Comic Sans MS', cursive;
+}
+
+#info-logo {
+    width: 100px;
+    height: auto;
+    border-radius: 8px;
+}
+
+#info-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+#info-desc {
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.block-group {
+    position: absolute;
+    pointer-events: auto;
+}
+
+.block {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #333;
+    position: absolute;
+    background-color: #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.cloud {
+    background: white;
+    border-radius: 50%;
+}
+
+.balloon {
+    background: radial-gradient(circle at center, #ff9a9e, #fad0c4);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+}
+
+
+
