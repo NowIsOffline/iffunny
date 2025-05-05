@@ -6,6 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
+    "deploy": "npx @cloudflare/next-on-pages --experimental-minify",
     "lint": "next lint"
   },
   "dependencies": {
@@ -14,6 +15,7 @@
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.12",
     "@tailwindcss/postcss": "^4",
     "tailwindcss": "^4"
   }
