@@ -1,13 +1,13 @@
 'use client';
 import React, { useState, useEffect } from "react";
-
+import GoogleCode from "@/app/googleCode";
 const DEFAULT_SITES = [
-    { name: "Ball Game", url: "https://iffunny.com/ballgames/", logo: "/icon/ballgames.png" },
-    { name: "Compose Game", url: "https://iffunny.com/composegame/", logo: "/icon/composegame.png" },
-    { name: "No Spy", url: "https://iffunny.com/nervesgame/", logo: "/icon/protect.png" },
-    { name: "png2ico", url: "https://iffunny.com/png2ico/", logo: "/icon/png2ico.png" },
-    { name: "TXT reader", url: "https://iffunny.com/txtreader/", logo: "/icon/education.png" },
-    { name:"choice-helper", url: "https://iffunny.com/choice-helper/", logo: "/icon/choice-helper.png" },
+    // { name: "Ball Game", url: "https://iffunny.com/ballgames/", logo: "/icon/ballgames.png" },
+    // { name: "Compose Game", url: "https://iffunny.com/composegame/", logo: "/icon/composegame.png" },
+    // { name: "No Spy", url: "https://iffunny.com/nervesgame/", logo: "/icon/protect.png" },
+    // { name: "png2ico", url: "https://iffunny.com/png2ico/", logo: "/icon/png2ico.png" },
+    // { name: "TXT reader", url: "https://iffunny.com/txtreader/", logo: "/icon/education.png" },
+    // { name:"choice-helper", url: "https://iffunny.com/choice-helper/", logo: "/icon/choice-helper.png" },
     { name:"Google", url: "https://google.com", logo: "https://www.google.com/favicon.ico" },
     { name: "GitHub", url: "https://github.com", logo: "https://github.com/favicon.ico" },
     { name: "Wikipedia", url: "https://wikipedia.org", logo: "https://www.wikipedia.org/favicon.ico" }
@@ -51,7 +51,8 @@ export default function CartoonNav() {
     const filteredSites = allSites.filter(site =>
         site.name.toLowerCase().includes(search.toLowerCase())
     );
-
+    
+    
     const handleAddSite = () => {
         if (!newSite.url.trim()) return;
         setCustomSites([...customSites, { ...newSite }]);
@@ -62,6 +63,7 @@ export default function CartoonNav() {
     return (
         <main className="relative min-h-screen font-sans">
             {/* Background Image */}
+            <GoogleCode/>
             <img
                 src="/image/bg01.png"
                 alt="Background"
