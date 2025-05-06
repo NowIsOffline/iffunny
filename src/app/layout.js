@@ -25,9 +25,9 @@ export default function RootLayout({ children }) {
             content="iFunny - choice-helper.iFunny tools platform offering choice-helper and various productivity utilities."/>
       <meta name="keywords"
             content="iFunny,merging game, TXT reader,spy game,Spy Identification, Tension Challenge,choice-helper,tools platform, online utilities, decision helper"/>
-      <link rel="icon" type="image/png" sizes="32x32" href="./icon/small/robot/favicon-32x32.png"/>
-      <link rel="icon" type="image/png" sizes="16x16" href="./icon/small/robot/favicon-16x16.png"/>
-      <link rel="apple-touch-icon" sizes="180x180" href="./icon/small/robot/apple-touch-icon.png"/>
+      <link rel="icon" type="image/png" sizes="32x32" href="icon/small/robot/favicon-32x32.png"/>
+      <link rel="icon" type="image/png" sizes="16x16" href="icon/small/robot/favicon-16x16.png"/>
+      <link rel="apple-touch-icon" sizes="180x180" href="icon/small/robot/apple-touch-icon.png"/>
 
       <meta property="og:title" content="iFunny | choice-helper"/>
       <meta property="og:description" content="choice-helper,funny game"/>

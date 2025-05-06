@@ -1,12 +1,13 @@
 'use client';
 import React, { useState, useEffect } from "react";
 import GoogleCode from "@/app/googleCode";
+import Link from 'next/link';
 const DEFAULT_SITES = [
     // { name: "Ball Game", url: "https://iffunny.com/ballgames/", logo: "/icon/ballgames.png" },
     // { name: "Compose Game", url: "https://iffunny.com/composegame/", logo: "/icon/composegame.png" },
     // { name: "No Spy", url: "https://iffunny.com/nervesgame/", logo: "/icon/protect.png" },
-    // { name: "png2ico", url: "https://iffunny.com/png2ico/", logo: "/icon/png2ico.png" },
-    // { name: "TXT reader", url: "https://iffunny.com/txtreader/", logo: "/icon/education.png" },
+    { name: "png2ico", url: "/tools/png2ico", logo: "/icon/png2ico.png" },
+    { name: "TXT reader", url: "/tools/txtreader/", logo: "/icon/education.png" },
     // { name:"choice-helper", url: "https://iffunny.com/choice-helper/", logo: "/icon/choice-helper.png" },
     { name:"Google", url: "https://google.com", logo: "https://www.google.com/favicon.ico" },
     { name: "GitHub", url: "https://github.com", logo: "https://github.com/favicon.ico" },
@@ -92,14 +93,14 @@ export default function CartoonNav() {
                 <section className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-6 justify-items-center">
                     {filteredSites.map((site) => (
                         <div key={site.url} className="flex flex-col items-center space-y-1">
-                            <a
+                            <Link
                                 href={site.url}
                                 className="w-20 h-20 flex items-center justify-center bg-white bg-opacity-80 rounded-2xl shadow-md hover:shadow-lg hover:scale-105 transition-all border border-blue-200"
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
                                 <img src={site.logo} alt={`${site.name} logo`} className="w-10 h-10" />
-                            </a>
+                            </Link >
                             <span className="text-xs text-white font-medium text-center px-1 leading-tight">
                 {site.name}
               </span>
