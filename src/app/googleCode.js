@@ -16,7 +16,6 @@ export default function GoogleCode() {
         `}
             </Script>
 
-            <div>Your Component</div>
         </>
     );
 }
