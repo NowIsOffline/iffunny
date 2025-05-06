@@ -121,18 +121,8 @@ export default function PngToIconConverter() {
     const t = texts[currentLang];
 
     return (
-        <>
-            <Head>
-                <meta charSet="UTF-8" />
-                <link rel="canonical" href="https://iffunny.com/" />
-                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                <meta name="description" content="Convert PNG to ICO and other sizes online. 在线多尺寸 PNG 转图标工具。" />
-                <title>PNG to Multi-Size Icon Converter</title>
-                <link rel="icon" type="image/png" href="icon/small/png2ico/png2ico_32x32.png" />
-                <meta name="description" content="Free online tool to convert PNG to multiple icon sizes like 16x16, 32x32, 512x512. 免费在线 PNG 图标转换工具。" />
-                <meta name="keywords" content="png to ico, png resize, 图标生成, favicon 生成, 图标打包" />
-                <meta property="og:title" content="PNG to Multi-Size Icon Generator" />
-            </Head>
+        <main>
+            
 
             <div className="min-h-screen bg-gray-50 text-gray-800 flex flex-col items-center justify-center p-4">
                 <div className="max-w-lg w-full bg-white p-6 rounded-xl shadow-md text-center">
@@ -215,6 +205,6 @@ export default function PngToIconConverter() {
                     &copy; 2025 PNG to ICO Tool
                 </footer>
             </div>
-        </>
+        </main>
     );
 }

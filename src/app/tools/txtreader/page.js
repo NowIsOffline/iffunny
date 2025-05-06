@@ -393,16 +393,8 @@ export default function TxtReader() {
     }, []);
 
     return (
-        <>
-            <Head>
-                <meta charSet="UTF-8" />
-                <link rel="canonical" href="https://iffunny.com/" />
-                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                <meta name="description" content="TXT reader" />
-                <meta name="keywords" content="txt" />
-                <link rel="icon" type="image/png" href="icon/small/education/favicon-32x32.png" />
-                <title>TXT reader</title>
-            </Head>
+        <main>
+        
 
             <div className="language-switcher">
                 <button
@@ -861,6 +853,6 @@ export default function TxtReader() {
           }
         }
       `}</style>
-        </>
+        </main>
     );
 }

@@ -64,7 +64,7 @@ export default function CartoonNav() {
     return (
         <main className="relative min-h-screen font-sans">
             {/* Background Image */}
-            <GoogleCode/>
+
             <img
                 src="/image/bg01.png"
                 alt="Background"
