@@ -1,6 +1,7 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Head from 'next/head';
+import HeadItem from "@/app/headItem";
 
 export default function TxtReader() {
     // 状态管理
@@ -393,9 +394,9 @@ export default function TxtReader() {
     }, []);
 
     return (
-        <main>
-        
-
+        <div>
+            <HeadItem title="TXT reader"
+                      iconUrl="/icon/small/education/education.png"></HeadItem>
             <div className="language-switcher">
                 <button
                     className={`lang-btn ${currentLanguage === 'en' ? 'active' : ''}`}
@@ -853,6 +854,6 @@ export default function TxtReader() {
           }
         }
       `}</style>
-        </main>
+        </div>
     );
 }

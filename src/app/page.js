@@ -1,7 +1,8 @@
 'use client';
 import React, { useState, useEffect } from "react";
-import GoogleCode from "@/app/googleCode";
 import Link from 'next/link';
+import HeadItem from "@/app/headItem";
+
 const DEFAULT_SITES = [
     // { name: "Ball Game", url: "https://iffunny.com/ballgames/", logo: "/icon/ballgames.png" },
     // { name: "Compose Game", url: "https://iffunny.com/composegame/", logo: "/icon/composegame.png" },
@@ -62,9 +63,10 @@ export default function CartoonNav() {
     };
 
     return (
+        
         <main className="relative min-h-screen font-sans">
             {/* Background Image */}
-
+            <HeadItem title="If funny" iconUrl="/icon/small/robot/favicon.png"></HeadItem>
             <img
                 src="/image/bg01.png"
                 alt="Background"

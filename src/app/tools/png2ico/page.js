@@ -1,7 +1,8 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Head from 'next/head';
 import JSZip from 'jszip';
+import HeadItem from "@/app/headItem";
 
 export default function PngToIconConverter() {
     const [isEnglish, setIsEnglish] = useState(true);
@@ -122,7 +123,8 @@ export default function PngToIconConverter() {
 
     return (
         <main>
-            
+            <HeadItem title="PNG to Multi-Size Icon Generator" 
+                      iconUrl="/icon/small/png2ico/png2ico.png"></HeadItem>
 
             <div className="min-h-screen bg-gray-50 text-gray-800 flex flex-col items-center justify-center p-4">
                 <div className="max-w-lg w-full bg-white p-6 rounded-xl shadow-md text-center">

@@ -14,7 +14,6 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "If funny",
   description: "iFunny - choice-helper.iFunny tools platform offering choice-helper and various productivity utilities.", 
   keywords:"iFunny,merging game, TXT reader,spy game,Spy Identification, Tension Challenge,choice-helper,tools platform, online utilities, decision helper",
   viewport:"width=device-width, initial-scale=1.0"  
@@ -23,12 +22,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
       <html lang="en">
-      <link rel="canonical" href="https://iffunny.com/"/>
       <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
       <GoogleCode/>
-      
+
       {children}
       </body>
       </html>
