@@ -10,7 +10,8 @@ import HeadItem from '@/app/headItem';
 import Icon from '@/app/IconComponent';
 import FolderModal from '@/app/FolderModal';
 import CustomDragLayer from '@/app/CustomDragLayer';
-let idCounter = 1000;
+import TrashDropArea from './TrashDropArea';
+import Head from "next/head";
 const generateId = () => {
     const saved = localStorage.getItem('dashboard_items');
     const savedItems = saved ? JSON.parse(saved) : [];
@@ -43,27 +44,43 @@ const backend = isTouchDevice() ? TouchBackend : HTML5Backend;
 const DEFAULT_SITES = [
     { id: 1, type: 'site', name: 'png2ico', url: '/tools/png2ico', logo: '/icon/png2ico.png', undeletable: true },
     { id: 2, type: 'site', name: 'TXT reader', url: '/tools/txtreader', logo: '/icon/education.png', undeletable: true },
-    { id: 3, type: 'site', name: 'Google', url: 'https://google.com', logo: 'https://www.google.com/favicon.ico' },
-    { id: 4, type: 'site', name: 'GitHub', url: 'https://github.com', logo: 'https://github.com/favicon.ico' },
-    { id: 5, type: 'site', name: 'Wikipedia', url: 'https://wikipedia.org', logo: 'https://www.wikipedia.org/favicon.ico' },
+    { id: 3, type: 'site', name: 'Google', url: 'https://google.com', logo: 'https://www.google.com/favicon.ico',undeletable: true},
+    { id: 4, type: 'site', name: 'GitHub', url: 'https://github.com', logo: 'https://github.com/favicon.ico',undeletable: true },
+    { id: 5, type: 'site', name: 'Wikipedia', url: 'https://wikipedia.org', logo: 'https://www.wikipedia.org/favicon.ico' ,undeletable: true},
 ];
 const AddIconModal = ({ show, onClose, onAdd }) => {
     const [newSiteName, setNewSiteName] = useState('');
     const [newSiteUrl, setNewSiteUrl] = useState('');
 
     const handleAdd = () => {
-        if (!newSiteName.trim() || !newSiteUrl.trim()) return;
+        const trimmedUrl = newSiteUrl.trim();
+        const trimmedName = newSiteName.trim();
+
+        if (!trimmedName || !trimmedUrl) {
+            alert('Please enter all msg');
+            return;
+        }
+
+        // ✅ URL 格式验证
+        const isValidUrl = /^https?:\/\/.+/.test(trimmedUrl);
+        if (!isValidUrl) {
+            alert('（http:// or https://）');
+            return;
+        }
+
         const newItem = {
-            id: generateId(),
+            id: generateId(items),
             type: 'site',
-            name: newSiteName,
-            url: newSiteUrl,
-            logo: `${newSiteUrl.replace(/\/$/, '')}/favicon.ico`,
+            name: trimmedName,
+            url: trimmedUrl,
+            logo: `${trimmedUrl.replace(/\/$/, '')}/favicon.ico`,
         };
+
         onAdd(newItem);
         setNewSiteName('');
         setNewSiteUrl('');
         onClose();
+
     };
 
     if (!show) return null;
@@ -108,11 +125,18 @@ export default function DashboardPage() {
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem('dashboard_items');
-            // localStorage.setItem('dashboard_items', "");
+            if(saved==="null"){
+                localStorage.setItem('dashboard_items',"");
+            }
             const savedItems = saved ? JSON.parse(saved) : [];
-            const childIds = savedItems
-                .filter(i => i.type === 'folder' && Array.isArray(i.children))
-                .flatMap(f => f.children.map(child => child.id));
+            let childIds=[];
+            console.log(savedItems)
+            if(savedItems){
+                childIds= savedItems
+                    .filter(i => i.type === 'folder' && Array.isArray(i.children))
+                    .flatMap(f => f.children.map(child => child.id));
+            }
+          
 
             const merged = [
                 ...DEFAULT_SITES.filter(d => !childIds.includes(d.id)),
@@ -210,7 +234,15 @@ export default function DashboardPage() {
         <DndProvider backend={backend}>
             <main className="relative min-h-screen font-sans" onMouseUp={handleOuterDrop} onMouseMove={handleOuterDrop}>
                 <HeadItem title="If Funny" iconUrl="/icon/small/robot/favicon.png" />
+                <Head>
+                    <meta property="og:title" content="If funny" />
+                    <meta property="og:description" content="Drag, group and manage your favorite websites on a personalized web dashboard. No login required." />
+                    <meta property="og:image" content="/icon/robot.png" />
+                    <meta name="viewport" content="width=device-width, initial-scale=1" />
+                </Head>
+
                 <CustomDragLayer />
+                <TrashDropArea onDelete={(id) => setItems(prev => prev.filter(i => i.id !== id))} />
                 <img src="/image/bg01.png" alt="Background" className="absolute inset-0 w-full h-full object-cover z-0" />
                 <div className="absolute inset-0 bg-white/30 backdrop-blur-md z-0" />
 
