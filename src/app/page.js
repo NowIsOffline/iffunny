@@ -15,9 +15,14 @@ import Head from "next/head";
 const generateId = () => {
     const saved = localStorage.getItem('dashboard_items');
     const savedItems = saved ? JSON.parse(saved) : [];
-    const childIds = savedItems
-        .filter(i => i.type === 'folder' && Array.isArray(i.children))
-        .flatMap(f => f.children.map(child => child.id));
+    let childIds=[];
+    console.log(savedItems)
+    if(savedItems){
+        childIds= savedItems
+            .filter(i => i.type === 'folder' && Array.isArray(i.children))
+            .flatMap(f => f.children.map(child => child.id));
+    }
+
 
     const merged = [
         ...DEFAULT_SITES.filter(d => !childIds.includes(d.id)),
@@ -69,7 +74,7 @@ const AddIconModal = ({ show, onClose, onAdd }) => {
         }
 
         const newItem = {
-            id: generateId(items),
+            id: generateId(),
             type: 'site',
             name: trimmedName,
             url: trimmedUrl,
