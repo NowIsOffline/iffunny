@@ -127,34 +127,84 @@ export default function DashboardPage() {
     const [folderRect, setFolderRect] = useState(null);
     const folderRef = useRef(null);
     const [showAddModal, setShowAddModal] = useState(false);
+    const resolveIdConflicts = (savedItems, defaultSites) => {
+        const usedIds = new Set(defaultSites.map(site => site.id));
+        let nextId = Math.max(...usedIds) + 1;
+
+        const reassignId = (item) => {
+            item.id = nextId++;
+            usedIds.add(item.id);
+        };
+
+        const updatedItems = savedItems.map(item => {
+            const newItem = { ...item };
+
+            if (usedIds.has(newItem.id)) {
+                reassignId(newItem);
+            } else {
+                usedIds.add(newItem.id);
+            }
+
+            if (newItem.type === 'folder' && Array.isArray(newItem.children)) {
+                newItem.children = newItem.children.map(child => {
+                    const newChild = { ...child };
+                    if (usedIds.has(newChild.id)) {
+                        reassignId(newChild);
+                    } else {
+                        usedIds.add(newChild.id);
+                    }
+                    return newChild;
+                });
+            }
+
+            return newItem;
+        });
+
+        return updatedItems;
+    };
+
+    const [initialized, setInitialized] = useState(false);
+
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem('dashboard_items');
-            if(saved==="null"){
-                localStorage.setItem('dashboard_items',"");
-            }
-            const savedItems = saved ? JSON.parse(saved) : [];
-            let childIds=[];
-            console.log(savedItems)
-            if(savedItems){
-                childIds= savedItems
-                    .filter(i => i.type === 'folder' && Array.isArray(i.children))
-                    .flatMap(f => f.children.map(child => child.id));
-            }
-          
+            const savedItemsRaw = saved ? JSON.parse(saved) : [];
+
+            const resolvedSavedItems = resolveIdConflicts(savedItemsRaw, DEFAULT_SITES);
+
+            const childIds = resolvedSavedItems
+                .filter(i => i.type === 'folder' && Array.isArray(i.children))
+                .flatMap(f => f.children.map(child => child.id));
 
             const merged = [
                 ...DEFAULT_SITES.filter(d => !childIds.includes(d.id)),
-                ...savedItems.filter(item => !DEFAULT_SITES.some(d => d.id === item.id)),
+                ...resolvedSavedItems.filter(item => !DEFAULT_SITES.some(d => d.id === item.id)),
             ];
+
             setItems(merged);
+            setInitialized(true); // ✅ 标记已完成初始化
         }
     }, []);
+
+
+    const prevRef = useRef();
+
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('dashboard_items', JSON.stringify(items));
+        if (!items) return;
+
+        const filteredItems = items.filter(item =>
+            !DEFAULT_SITES.some(site => site.id === item.id)
+        );
+
+        const current = JSON.stringify(filteredItems);
+
+        if (prevRef.current !== current && typeof window !== 'undefined') {
+            console.log("set item dashboard_items");
+            localStorage.setItem('dashboard_items', current);
+            prevRef.current = current;
         }
     }, [items]);
+
 
     useEffect(() => {
         const updateTime = () => {
@@ -258,27 +308,30 @@ export default function DashboardPage() {
                         <h2 className="text-lg text-blue-100 italic drop-shadow">Drag icons to create folders</h2>
                     </header>
 
-                    <section className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-6 justify-items-center">
-                        {items.map((item) => (
-                            <Icon
-                                key={item.id}
-                                item={item}
-                                onDrop={handleDrop}
-                                onDelete={() => {}}
-                                onOpenFolder={(folder) => setFolderView(folder)}
-                            />
-                        ))}
-                        {/* 添加图标按钮 */}
-                        <div
-                            onClick={() => setShowAddModal(true)}
-                            className="flex flex-col items-center space-y-1 cursor-pointer"
-                        >
-                            <div className="w-20 h-20 flex items-center justify-center bg-white bg-opacity-80 rounded-2xl shadow-md border border-dashed border-blue-400 hover:bg-blue-100">
-                                <span className="text-3xl text-blue-500 font-bold">+</span>
+                    {initialized ? (
+                        <section className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-6 justify-items-center">
+                            {items.map((item) => (
+                                <Icon
+                                    key={item.id}
+                                    item={item}
+                                    onDrop={handleDrop}
+                                    onDelete={() => {}}
+                                    onOpenFolder={(folder) => setFolderView(folder)}
+                                />
+                            ))}
+                            {/* 添加图标按钮 */}
+                            <div
+                                onClick={() => setShowAddModal(true)}
+                                className="flex flex-col items-center space-y-1 cursor-pointer"
+                            >
+                                <div className="w-20 h-20 flex items-center justify-center bg-white bg-opacity-80 rounded-2xl shadow-md border border-dashed border-blue-400 hover:bg-blue-100">
+                                    <span className="text-3xl text-blue-500 font-bold">+</span>
+                                </div>
+                                <span className="text-xs text-white font-medium text-center">Add</span>
                             </div>
-                            <span className="text-xs text-white font-medium text-center">Add</span>
-                        </div>
-                    </section>
+                        </section>
+                    ) : null}
+    
                     <AddIconModal
                         show={showAddModal}
                         onClose={() => setShowAddModal(false)}

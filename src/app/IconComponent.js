@@ -7,9 +7,7 @@ import Link from 'next/link';
 const ItemTypes = { ICON: 'icon' };
 
 export default function Icon({ item, onDrop, onDelete, onOpenFolder }) {
-    useEffect(() => {
-        preview(getEmptyImage(), { captureDraggingState: true });
-    }, []);
+    if (!item || typeof item.id === 'undefined') return null;
 
     const iconBox = (
         <div className="w-20 h-20 flex items-center justify-center bg-white bg-opacity-80 rounded-2xl shadow-md border border-blue-200" onClick={() => item.type === 'folder' && onOpenFolder(item)}>
@@ -31,13 +29,21 @@ export default function Icon({ item, onDrop, onDelete, onOpenFolder }) {
         },
         collect: (monitor) => ({ isOver: !!monitor.isOver({ shallow: true }) }),
     });
-
+    useEffect(() => {
+        preview(getEmptyImage(), { captureDraggingState: true });
+    }, [preview]);
     return (
         <div
             ref={(node) => drag(drop(node))}
             className={`flex flex-col items-center space-y-1 cursor-pointer transition-transform ${isOver ? 'scale-125 z-10' : ''}`}
-            style={{ opacity: isDragging ? 0.4 : 1 }}
-        >
+            style={{ opacity: isDragging ? 0 : 1 }}
+            onContextMenu={(e) => e.preventDefault()}
+            onTouchStart={(e) => {
+                if (e.touches.length === 1) {
+                    e.preventDefault(); // 阻止浏览器长按菜单
+                }
+            }}
+            >
             {item.type === 'site' ? (
                 <Link href={item.url || '#'} target="_blank" rel="noopener noreferrer">{iconBox}</Link>
             ) : iconBox}
