@@ -1,179 +1,285 @@
+// 安装依赖：
+// npm install react-dnd react-dnd-html5-backend
+
 'use client';
-import React, { useState, useEffect } from "react";
-import Link from 'next/link';
-import HeadItem from "@/app/headItem";
+import React, { useState, useEffect, useRef } from 'react';
+import { DndProvider, useDrag, useDrop } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
+import HeadItem from '@/app/headItem';
+import Icon from '@/app/IconComponent';
+import FolderModal from '@/app/FolderModal';
+import CustomDragLayer from '@/app/CustomDragLayer';
+let idCounter = 1000;
+const generateId = () => {
+    const saved = localStorage.getItem('dashboard_items');
+    const savedItems = saved ? JSON.parse(saved) : [];
+    const childIds = savedItems
+        .filter(i => i.type === 'folder' && Array.isArray(i.children))
+        .flatMap(f => f.children.map(child => child.id));
 
+    const merged = [
+        ...DEFAULT_SITES.filter(d => !childIds.includes(d.id)),
+        ...savedItems.filter(item => !DEFAULT_SITES.some(d => d.id === item.id)),
+    ];
+    let maxId=1;
+    merged.forEach(item => {
+        if (item.id > maxId) maxId = item.id;
+        if (item.type === 'folder' && Array.isArray(item.children)) {
+            item.children.forEach(child => {
+                if (child.id > maxId) maxId = child.id;
+            });
+        }
+    });
+
+    return maxId + 1;
+};
+
+const isTouchDevice = () =>
+    typeof window !== 'undefined' &&
+    ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+
+const backend = isTouchDevice() ? TouchBackend : HTML5Backend;
 const DEFAULT_SITES = [
-    // { name: "Ball Game", url: "https://iffunny.com/ballgames/", logo: "/icon/ballgames.png" },
-    // { name: "Compose Game", url: "https://iffunny.com/composegame/", logo: "/icon/composegame.png" },
-    // { name: "No Spy", url: "https://iffunny.com/nervesgame/", logo: "/icon/protect.png" },
-    { name: "png2ico", url: "/tools/png2ico", logo: "/icon/png2ico.png" },
-    { name: "TXT reader", url: "/tools/txtreader/", logo: "/icon/education.png" },
-    // { name:"choice-helper", url: "https://iffunny.com/choice-helper/", logo: "/icon/choice-helper.png" },
-    { name:"Google", url: "https://google.com", logo: "https://www.google.com/favicon.ico" },
-    { name: "GitHub", url: "https://github.com", logo: "https://github.com/favicon.ico" },
-    { name: "Wikipedia", url: "https://wikipedia.org", logo: "https://www.wikipedia.org/favicon.ico" }
-
+    { id: 1, type: 'site', name: 'png2ico', url: '/tools/png2ico', logo: '/icon/png2ico.png', undeletable: true },
+    { id: 2, type: 'site', name: 'TXT reader', url: '/tools/txtreader', logo: '/icon/education.png', undeletable: true },
+    { id: 3, type: 'site', name: 'Google', url: 'https://google.com', logo: 'https://www.google.com/favicon.ico' },
+    { id: 4, type: 'site', name: 'GitHub', url: 'https://github.com', logo: 'https://github.com/favicon.ico' },
+    { id: 5, type: 'site', name: 'Wikipedia', url: 'https://wikipedia.org', logo: 'https://www.wikipedia.org/favicon.ico' },
 ];
+const AddIconModal = ({ show, onClose, onAdd }) => {
+    const [newSiteName, setNewSiteName] = useState('');
+    const [newSiteUrl, setNewSiteUrl] = useState('');
 
-const LOCAL_STORAGE_KEY = "customSites";
+    const handleAdd = () => {
+        if (!newSiteName.trim() || !newSiteUrl.trim()) return;
+        const newItem = {
+            id: generateId(),
+            type: 'site',
+            name: newSiteName,
+            url: newSiteUrl,
+            logo: `${newSiteUrl.replace(/\/$/, '')}/favicon.ico`,
+        };
+        onAdd(newItem);
+        setNewSiteName('');
+        setNewSiteUrl('');
+        onClose();
+    };
 
-export default function CartoonNav() {
-    const [search, setSearch] = useState("");
-    const [time, setTime] = useState("");
-    const [customSites, setCustomSites] = useState([]);
-    const [showModal, setShowModal] = useState(false);
-    const [newSite, setNewSite] = useState({ name: "Website", url: "", logo: "/icon/robot.png" });
+    if (!show) return null;
+    return (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
+            <div className="bg-white p-6 rounded-xl shadow-lg w-96">
+                <h2 className="text-lg font-bold mb-4 text-gray-800">Add new website</h2>
+                <input
+                    type="text"
+                    placeholder="Name"
+                    value={newSiteName}
+                    onChange={(e) => setNewSiteName(e.target.value)}
+                    className="w-full p-2 border rounded-md mb-4"
+                />
+                <input
+                    type="text"
+                    placeholder="url (https://)"
+                    value={newSiteUrl}
+                    onChange={(e) => setNewSiteUrl(e.target.value)}
+                    className="w-full p-2 border rounded-md mb-4"
+                />
+                <div className="flex justify-end space-x-4">
+                    <button onClick={onClose} className="text-gray-500 hover:underline">Cancel</button>
+                    <button onClick={handleAdd} className="bg-blue-500 text-white px-4 py-1 rounded-md hover:bg-blue-600">Add</button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
+export default function DashboardPage() {
+    const [items, setItems] = useState(null);
+
+    const [folderView, setFolderView] = useState(null);
+    const [time, setTime] = useState('');
+    const [pendingFolder, setPendingFolder] = useState(null);
+    const [newFolderName, setNewFolderName] = useState('');
+    const [draggedChild, setDraggedChild] = useState(null);
+    const [folderRect, setFolderRect] = useState(null);
+    const folderRef = useRef(null);
+    const [showAddModal, setShowAddModal] = useState(false);
     useEffect(() => {
-        const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (saved) {
-            setCustomSites(JSON.parse(saved));
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('dashboard_items');
+            // localStorage.setItem('dashboard_items', "");
+            const savedItems = saved ? JSON.parse(saved) : [];
+            const childIds = savedItems
+                .filter(i => i.type === 'folder' && Array.isArray(i.children))
+                .flatMap(f => f.children.map(child => child.id));
+
+            const merged = [
+                ...DEFAULT_SITES.filter(d => !childIds.includes(d.id)),
+                ...savedItems.filter(item => !DEFAULT_SITES.some(d => d.id === item.id)),
+            ];
+            setItems(merged);
         }
     }, []);
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('dashboard_items', JSON.stringify(items));
+        }
+    }, [items]);
 
     useEffect(() => {
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(customSites));
-    }, [customSites]);
-
-    useEffect(() => {
-        const updateClock = () => {
+        const updateTime = () => {
             const now = new Date();
-            const hours = now.getHours().toString().padStart(2, "0");
-            const minutes = now.getMinutes().toString().padStart(2, "0");
-            const seconds = now.getSeconds().toString().padStart(2, "0");
-            setTime(`${hours}:${minutes}:${seconds}`);
+            const t = now.toTimeString().slice(0, 8);
+            setTime(t);
         };
-        updateClock();
-        const interval = setInterval(updateClock, 1000);
+        updateTime();
+        const interval = setInterval(updateTime, 1000);
         return () => clearInterval(interval);
     }, []);
 
-    const allSites = [...DEFAULT_SITES, ...customSites];
-    const filteredSites = allSites.filter(site =>
-        site.name.toLowerCase().includes(search.toLowerCase())
-    );
-    
-    
-    const handleAddSite = () => {
-        if (!newSite.url.trim()) return;
-        setCustomSites([...customSites, { ...newSite }]);
-        setNewSite({ name: "Website", url: "", logo: "/icon/other.png" });
-        setShowModal(false);
+    useEffect(() => {
+        if (folderRef.current) {
+            setFolderRect(folderRef.current.getBoundingClientRect());
+        }
+    }, [folderView]);
+    if (!items) return null; // 等待数据加载
+    const mergeToFolder = (itemA, itemB, folderName) => {
+        const newFolder = {
+            id: generateId(),
+            type: 'folder',
+            name: folderName,
+            logo: '/icon/folder.png',
+            children: [itemA, itemB],
+        };
+        setItems((prev) => prev.filter(i => i.id !== itemA.id && i.id !== itemB.id).concat(newFolder));
+    };
+
+    const handleDrop = (dragged, target) => {
+        if (target.type === 'site' && dragged.type === 'site' && !items.some(i => i.children?.some(c => c.id === dragged.id))) {
+            setPendingFolder({ itemA: dragged, itemB: target });
+        } else if (target.type === 'folder') {
+            setItems((prev) => prev.map(i => {
+                if (i.id === target.id) return { ...i, children: [...i.children, dragged] };
+                return i;
+            }).filter(i => i.id !== dragged.id));
+            setFolderView(null);
+        }
+    };
+
+    const handleCreateFolder = () => {
+        if (pendingFolder && newFolderName.trim()) {
+            mergeToFolder(pendingFolder.itemA, pendingFolder.itemB, newFolderName.trim());
+            setPendingFolder(null);
+            setNewFolderName('');
+        }
+    };
+
+    const handleRemoveFromFolder = (folderId, child) => {
+        let updatedFolder = null;
+        const updatedItems = items.flatMap(i => {
+            if (i.id === folderId) {
+                const rest = i.children.filter(c => c.id !== child.id);
+                if (rest.length === 1) return rest;
+                updatedFolder = { ...i, children: rest };
+                return updatedFolder;
+            }
+            return i;
+        });
+        setItems([...updatedItems, { ...child }]);
+        setFolderView(updatedFolder?.children.length > 0 ? updatedFolder : null);
+    };
+
+    const handleOuterDrop = (e) => {
+        if (draggedChild && folderRect && folderView) {
+            const x = e.clientX;
+            const y = e.clientY;
+            if (
+                x < folderRect.left ||
+                x > folderRect.right ||
+                y < folderRect.top ||
+                y > folderRect.bottom
+            ) {
+                handleRemoveFromFolder(folderView.id, draggedChild);
+                setDraggedChild(null);
+            }
+        }
     };
 
     return (
-        
-        <main className="relative min-h-screen font-sans">
-            {/* Background Image */}
-            <HeadItem title="If funny" iconUrl="/icon/small/robot/favicon.png"></HeadItem>
-            <img
-                src="/image/bg01.png"
-                alt="Background"
-                className="absolute inset-0 w-full h-full object-cover z-0"
-            />
-            {/* Blurred Overlay */}
-            <div className="absolute inset-0 bg-white/30 backdrop-blur-md z-0" />
+        <DndProvider backend={backend}>
+            <main className="relative min-h-screen font-sans" onMouseUp={handleOuterDrop} onMouseMove={handleOuterDrop}>
+                <HeadItem title="If Funny" iconUrl="/icon/small/robot/favicon.png" />
+                <CustomDragLayer />
+                <img src="/image/bg01.png" alt="Background" className="absolute inset-0 w-full h-full object-cover z-0" />
+                <div className="absolute inset-0 bg-white/30 backdrop-blur-md z-0" />
 
-            <div className="relative z-10 p-4 md:p-8 flex flex-col min-h-screen">
-                <header className="text-center mb-6">
-                    <div className="text-white text-3xl font-mono font-bold tracking-wider mb-1">{time}</div>
-                    <h1 className="text-4xl font-bold text-white mb-2 drop-shadow">If Funny</h1>
-                    <h2 className="text-lg text-blue-100 italic drop-shadow">Click any icon to visit the site</h2>
-                </header>
+                <div className="relative z-10 p-4 md:p-8 flex flex-col min-h-screen">
+                    <header className="text-center mb-6">
+                        <div className="text-white text-3xl font-mono font-bold tracking-wider mb-1">{time}</div>
+                        <h1 className="text-4xl font-bold text-white mb-2 drop-shadow">If Funny</h1>
+                        <h2 className="text-lg text-blue-100 italic drop-shadow">Drag icons to create folders</h2>
+                    </header>
 
-                <div className="flex justify-center mb-6">
-                    <input
-                        type="text"
-                        placeholder="🔍 Search site name"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="px-4 py-2 w-full max-w-md rounded-full shadow-inner border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    <section className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-6 justify-items-center">
+                        {items.map((item) => (
+                            <Icon
+                                key={item.id}
+                                item={item}
+                                onDrop={handleDrop}
+                                onDelete={() => {}}
+                                onOpenFolder={(folder) => setFolderView(folder)}
+                            />
+                        ))}
+                        {/* 添加图标按钮 */}
+                        <div
+                            onClick={() => setShowAddModal(true)}
+                            className="flex flex-col items-center space-y-1 cursor-pointer"
+                        >
+                            <div className="w-20 h-20 flex items-center justify-center bg-white bg-opacity-80 rounded-2xl shadow-md border border-dashed border-blue-400 hover:bg-blue-100">
+                                <span className="text-3xl text-blue-500 font-bold">+</span>
+                            </div>
+                            <span className="text-xs text-white font-medium text-center">Add</span>
+                        </div>
+                    </section>
+                    <AddIconModal
+                        show={showAddModal}
+                        onClose={() => setShowAddModal(false)}
+                        onAdd={(item) => setItems(prev => [...prev, item])}
                     />
+                    <footer className="mt-auto text-center text-sm text-white pt-10">
+                        Made by Offline @2025
+                    </footer>
                 </div>
 
-                <section className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-6 justify-items-center">
-                    {filteredSites.map((site) => (
-                        <div key={site.url} className="flex flex-col items-center space-y-1">
-                            <Link
-                                href={site.url}
-                                className="w-20 h-20 flex items-center justify-center bg-white bg-opacity-80 rounded-2xl shadow-md hover:shadow-lg hover:scale-105 transition-all border border-blue-200"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                <img src={site.logo} alt={`${site.name} logo`} className="w-10 h-10" />
-                            </Link >
-                            <span className="text-xs text-white font-medium text-center px-1 leading-tight">
-                {site.name}
-              </span>
-                        </div>
-                    ))}
+                <FolderModal
+                    folderView={folderView}
+                    folderRef={folderRef}
+                    onClose={() => setFolderView(null)}
+                    onRemoveChild={handleRemoveFromFolder}
+                    onDragStart={(child) => setDraggedChild(child)}
+                    onDrop={handleDrop}
+                />
 
-                    {/* Add new site */}
-                    <div
-                        className="flex flex-col items-center space-y-1 cursor-pointer"
-                        onClick={() => setShowModal(true)}
-                    >
-                        <div className="w-20 h-20 flex items-center justify-center bg-white bg-opacity-80 rounded-2xl shadow-inner border border-dashed border-blue-300 text-blue-400 text-3xl">
-                            +
-                        </div>
-                        <span className="text-xs text-white font-medium text-center px-1 leading-tight">
-              Add Site
-            </span>
-                    </div>
-                </section>
-
-                {/* Footer */}
-                <footer className="mt-auto text-center text-sm text-white pt-10">
-                    Made by Offline @2025
-                </footer>
-            </div>
-
-            {/* Modal */}
-            {showModal && (
-                <div className="fixed inset-0 z-20 bg-black/50 flex items-center justify-center">
-                    <div className="bg-white rounded-xl p-6 w-80 space-y-4 shadow-xl">
-                        <h3 className="text-lg font-bold text-gray-800 text-center">Add New Site</h3>
-                        <input
-                            type="text"
-                            placeholder="Site Name (default: Website)"
-                            value={newSite.name}
-                            onChange={(e) => setNewSite({ ...newSite, name: e.target.value })}
-                            className="w-full p-2 border rounded-md"
-                        />
-                        <input
-                            type="text"
-                            placeholder="Site URL (required)"
-                            value={newSite.url}
-                            onChange={(e) => setNewSite({ ...newSite, url: e.target.value })}
-                            className="w-full p-2 border rounded-md"
-                        />
-                        {/* Logo is fixed to default */}
-                        <input
-                            type="text"
-                            value="/icon/other.png"
-                            disabled
-                            className="w-full p-2 border rounded-md bg-gray-100 text-gray-400 cursor-not-allowed"
-                            title="Logo is fixed and not editable"
-                        />
-
-                        <div className="flex justify-between pt-2">
-                            <button
-                                onClick={() => setShowModal(false)}
-                                className="text-sm text-gray-500 hover:underline"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleAddSite}
-                                className="px-4 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
-                            >
-                                Add
-                            </button>
+                {pendingFolder && (
+                    <div className="fixed inset-0 z-40 bg-black/60 flex items-center justify-center">
+                        <div className="bg-white rounded-xl p-6 shadow-lg w-80">
+                            <h2 className="text-lg font-bold mb-4 text-gray-800">Name the New Folder</h2>
+                            <input
+                                type="text"
+                                placeholder="Enter folder name"
+                                value={newFolderName}
+                                onChange={(e) => setNewFolderName(e.target.value)}
+                                className="w-full p-2 border rounded-md mb-4"
+                            />
+                            <div className="flex justify-end space-x-4">
+                                <button onClick={() => setPendingFolder(null)} className="text-gray-500 hover:underline">Cancel</button>
+                                <button onClick={handleCreateFolder} className="bg-blue-500 text-white px-4 py-1 rounded-md hover:bg-blue-600">Create</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </main>
+                )}
+            </main>
+        </DndProvider>
     );
 }
