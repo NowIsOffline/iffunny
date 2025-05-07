@@ -35,19 +35,34 @@ export default function Icon({ item, onDrop, onDelete, onOpenFolder }) {
     return (
         <div
             ref={(node) => drag(drop(node))}
-            className={`flex flex-col items-center space-y-1 cursor-pointer transition-transform ${isOver ? 'scale-125 z-10' : ''}`}
-            style={{ opacity: isDragging ? 0 : 1 }}
-            onContextMenu={(e) => e.preventDefault()}
-            onTouchStart={(e) => {
-                if (e.touches.length === 1) {
-                    e.preventDefault(); // 阻止浏览器长按菜单
-                }
-            }}
-            >
+            className={`relative flex flex-col items-center space-y-1 cursor-pointer transition-transform ${
+                isOver ? 'scale-125 z-10' : ''
+            }`}
+            style={{opacity: isDragging ? 0 : 1}}
+        >
+            {/* 图标主体（可点不可点） */}
             {item.type === 'site' ? (
-                <Link href={item.url || '#'} target="_blank" rel="noopener noreferrer">{iconBox}</Link>
+                <Link href={item.url || '#'} target="_blank" rel="noopener noreferrer">
+                    {iconBox}
+                </Link>
             ) : iconBox}
-            <span className="text-xs text-white font-medium text-center px-1 leading-tight">{item.name}</span>
+
+            <span className="text-xs text-white font-medium text-center px-1 leading-tight">
+    {item.name}
+  </span>
+
+            {/* ✅ 透明点击罩层 */}
+            <div
+                className="absolute inset-0 z-10"
+                onClick={() => {
+                    if (item.type === 'folder') {
+                        onOpenFolder(item);
+                    } else if (item.type === 'site') {
+                        window.open(item.url, '_blank');
+                    }
+                }}
+            />
         </div>
+
     );
 }
