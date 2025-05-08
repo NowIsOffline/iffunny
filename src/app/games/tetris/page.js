@@ -1,14 +1,25 @@
 "use client";
 import { useEffect } from "react";
+import './gameLayout.css';
 import {
     initializeTetrisGame,
     restartGame,
     moveLeft,
     moveRight,
     moveDown,
-    rotatePiece
+    rotatePiece,
+    pauseGame
 } from "./tetrisGame";
-import './gameLayout.css';
+
+// 在 useEffect 里添加
+const settingsBtn = document.getElementById("settings-btn");
+if (settingsBtn) {
+    settingsBtn.onclick = () => {
+        pauseGame();
+        alert("设置菜单 - 可拓展为模态框");
+    };
+}
+
 
 export default function Page() {
     useEffect(() => {
@@ -70,13 +81,27 @@ export default function Page() {
     return (
         <main className="game-page-layout">
             <div className="game-container">
-                <canvas id="tetris-canvas" width="300" height="600"></canvas>
+                <div className="game-box">
+                    <div className="top-bar">
+                        <div className="next-piece-box">
+                            <canvas id="next-canvas" width="80" height="80"></canvas>
+                        </div>
+                        <div className="score-box">
+                            <p>Score: <span id="score-value">0</span></p>
+                            <button id="settings-btn">⚙️</button>
+                        </div>
+                    </div>
+                    <canvas id="tetris-canvas" width="300" height="600"></canvas>
+                </div>
 
+
+                {/* 游戏结束提示 */}
                 <div id="game-over-screen">
                     <p id="score-display">Score: 0</p>
                     <button onClick={restartGame}>重新开始</button>
                 </div>
 
+                {/* 控制按钮区域（移动端） */}
                 <div className="mobile-controls">
                     <div id="joystick-container" className="joystick-container">
                         <div id="joystick-knob" className="joystick-knob"></div>
@@ -87,5 +112,6 @@ export default function Page() {
                 </div>
             </div>
         </main>
+
     );
 }

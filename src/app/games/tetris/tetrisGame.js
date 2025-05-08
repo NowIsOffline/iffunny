@@ -1,8 +1,10 @@
+
 "use client";
 
 let canvas, ctx;
 let board = [];
 let currentPiece = null;
+let nextPiece = null;
 let dropInterval;
 let score = 0;
 const ROWS = 20;
@@ -36,7 +38,7 @@ function createPiece() {
 }
 
 function drawBoard() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (let y = 0; y < ROWS; y++) {
         for (let x = 0; x < COLS; x++) {
             if (board[y][x]) {
@@ -81,27 +83,65 @@ function mergePiece() {
 }
 
 function clearLines() {
+    let cleared = 0;
     for (let y = ROWS - 1; y >= 0; y--) {
         if (board[y].every(cell => cell)) {
             board.splice(y, 1);
-            board.unshift(new Array(COLS).fill(0)); // Add empty row at the top
-            score += 100;
-            y++; // Recheck the current row to avoid skipping
+            board.unshift(new Array(COLS).fill(0));
+            cleared++;
+            y++;
         }
     }
-    drawBoard();
+
+    if (cleared > 0) {
+        score += cleared * 100;
+        updateScoreDisplay();
+    }
+}
+
+function updateScoreDisplay() {
+    const scoreEl = document.getElementById("score-value");
+    if (scoreEl) {
+        scoreEl.textContent = score.toString();
+    }
+}
+
+function drawNextPiece() {
+    const canvas = document.getElementById("next-canvas");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (!nextPiece) return;
+
+    const shape = nextPiece.shape;
+    const type = nextPiece.type;
+    const blockSize = 20;
+    const offsetX = (canvas.width - shape[0].length * blockSize) / 2;
+    const offsetY = (canvas.height - shape.length * blockSize) / 2;
+
+    shape.forEach((row, y) => {
+        row.forEach((val, x) => {
+            if (val) {
+                ctx.fillStyle = COLORS[type];
+                ctx.fillRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
+                ctx.strokeStyle = "#000";
+                ctx.strokeRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
+            }
+        });
+    });
 }
 
 function drop() {
     if (!move(0, 1)) {
         mergePiece();
         clearLines();
-        currentPiece = createPiece();
+        currentPiece = nextPiece;
+        nextPiece = createPiece();
+        drawNextPiece();
         if (!validMove(currentPiece.shape, currentPiece.x, currentPiece.y)) {
             endGame();
         }
     }
-    drawBoard();
 }
 
 function move(dx, dy) {
@@ -119,46 +159,43 @@ function rotate() {
     const rotated = shape[0].map((_, i) => shape.map(row => row[i])).reverse();
     if (validMove(rotated, currentPiece.x, currentPiece.y)) {
         currentPiece.shape = rotated;
-        drawBoard();
     }
 }
 
 function endGame() {
-    clearInterval(dropInterval);
     isGamePause = true;
-    document.getElementById("game-over-screen").style.display = "flex";
+    clearInterval(dropInterval);
+    const over = document.getElementById("game-over-screen");
+    const scoreShow = document.getElementById("score-display");
+    if (over) over.style.display = "flex";
+    if (scoreShow) scoreShow.textContent = "Score: " + score;
 }
 
 function gameLoop(timestamp) {
     if (isGamePause) return;
-    if (!lastDropTime) lastDropTime = timestamp;
+    if (lastDropTime === 0) lastDropTime = timestamp;
     const delta = timestamp - lastDropTime;
-
     if (delta > dropDelay) {
         drop();
         lastDropTime = timestamp;
     }
-
     drawBoard();
     requestAnimationFrame(gameLoop);
-}
-
-export function restartGame() {
-    isGamePause = false;
-    document.getElementById("game-over-screen").style.display = "none";
-    initializeTetrisGame();
 }
 
 export function initializeTetrisGame() {
     canvas = document.getElementById("tetris-canvas");
     ctx = canvas.getContext("2d");
-    board = [];
-    for (let y = 0; y < ROWS; y++) board[y] = new Array(COLS).fill(0);
+    board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
     currentPiece = createPiece();
+    nextPiece = createPiece();
     score = 0;
-    drawBoard();
-
+    isGamePause = false;
+    lastDropTime = 0;
+    drawNextPiece();
+    updateScoreDisplay();
     requestAnimationFrame(gameLoop);
+
     document.addEventListener("keydown", e => {
         if (e.key === "ArrowLeft" || e.key === "a") move(-1, 0);
         if (e.key === "ArrowRight" || e.key === "d") move(1, 0);
@@ -166,8 +203,25 @@ export function initializeTetrisGame() {
         if (e.key === "z") rotate();
     });
 
-    document.getElementById("rotate-btn").onclick = rotate;
+    const btnL = document.getElementById("left-btn");
+    const btnR = document.getElementById("right-btn");
+    const btnD = document.getElementById("down-btn");
+    const btnRot = document.getElementById("rotate-btn");
 
+    if (btnL) btnL.onclick = () => move(-1, 0);
+    if (btnR) btnR.onclick = () => move(1, 0);
+    if (btnD) btnD.onclick = () => move(0, 1);
+    if (btnRot) btnRot.onclick = rotate;
+}
+
+export function restartGame() {
+    const over = document.getElementById("game-over-screen");
+    if (over) over.style.display = "none";
+    initializeTetrisGame();
+}
+
+export function pauseGame() {
+    isGamePause = true;
 }
 
 export function moveLeft() {
