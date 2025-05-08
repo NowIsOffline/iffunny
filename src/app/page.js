@@ -52,7 +52,7 @@ const DEFAULT_SITES = [
     { id: 3, type: 'site', name: 'Google', url: 'https://google.com', logo: 'https://www.google.com/favicon.ico',undeletable: true},
     { id: 4, type: 'site', name: 'GitHub', url: 'https://github.com', logo: 'https://github.com/favicon.ico',undeletable: true },
     { id: 5, type: 'site', name: 'Wikipedia', url: 'https://wikipedia.org', logo: 'https://www.wikipedia.org/favicon.ico' ,undeletable: true},
-    { id: 6, type: 'site', name: 'TetrisGame', url: '/funnygame?id=2', logo: '/icon/tetris.png' ,undeletable: true},
+    { id: 6, type: 'site', name: 'TetrisGame', url: '/games/tetris', logo: '/icon/tetris.png' ,undeletable: true},
 ];
 const AddIconModal = ({ show, onClose, onAdd }) => {
     const [newSiteName, setNewSiteName] = useState('');

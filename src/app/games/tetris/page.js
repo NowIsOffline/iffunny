@@ -11,19 +11,18 @@ import {
     pauseGame
 } from "./tetrisGame";
 
-// 在 useEffect 里添加
-const settingsBtn = document.getElementById("settings-btn");
-if (settingsBtn) {
-    settingsBtn.onclick = () => {
-        pauseGame();
-        alert("设置菜单 - 可拓展为模态框");
-    };
-}
-
-
 export default function Page() {
     useEffect(() => {
         initializeTetrisGame();
+
+        // 设置按钮点击事件
+        const settingsBtn = document.getElementById("settings-btn");
+        if (settingsBtn) {
+            settingsBtn.onclick = () => {
+                pauseGame();
+                alert("设置菜单 - 可拓展为模态框");
+            };
+        }
 
         const knob = document.getElementById("joystick-knob");
         const container = document.getElementById("joystick-container");
@@ -32,9 +31,8 @@ export default function Page() {
 
         let startX = 0;
         let startY = 0;
-
         let lastMoveTime = 0;
-        const throttleDelay = 100; // 每 200ms 才允许移动一次
+        const throttleDelay = 100;
 
         container.addEventListener("touchstart", e => {
             const touch = e.touches[0];
@@ -45,7 +43,7 @@ export default function Page() {
         container.addEventListener("touchmove", e => {
             e.preventDefault();
             const now = Date.now();
-            if (now - lastMoveTime < throttleDelay) return; // 如果触发太快就忽略
+            if (now - lastMoveTime < throttleDelay) return;
             lastMoveTime = now;
 
             const touch = e.touches[0];
@@ -77,7 +75,6 @@ export default function Page() {
         }
     }, []);
 
-
     return (
         <main className="game-page-layout">
             <div className="game-container">
@@ -93,7 +90,6 @@ export default function Page() {
                     </div>
                     <canvas id="tetris-canvas" width="300" height="600"></canvas>
                 </div>
-
 
                 {/* 游戏结束提示 */}
                 <div id="game-over-screen">
@@ -112,6 +108,5 @@ export default function Page() {
                 </div>
             </div>
         </main>
-
     );
 }
