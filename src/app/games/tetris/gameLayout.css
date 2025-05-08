@@ -1,0 +1,50 @@
+/* src/app/game/gameLayout.css */
+
+/* 基本布局 */
+.game-page-layout {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: 'Comic Sans MS', sans-serif;  /* 卡通字体 */
+    overflow: hidden;
+}
+
+/* 游戏容器：桌面端时固定宽高 */
+.game-container {
+    width: 300px;  /* 保证桌面端时，canvas 宽度固定 */
+    height: 600px;  /* 保证桌面端时，canvas 高度固定 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* canvas 样式： */
+#tetris-canvas {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    border: 5px solid #FFD700;  /* 添加金色边框，增加卡通感 */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);  /* 给 canvas 添加阴影效果 */
+}
+
+/* 移动端样式：确保 canvas 填满整个屏幕 */
+@media (max-width: 768px) {
+    .game-page-layout {
+        padding: 0;
+    }
+
+    .game-container {
+        width: 100vw;  /* 填满整个屏幕 */
+        height: 100vh; /* 填满整个屏幕 */
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    #tetris-canvas {
+        width: 100vw;  /* canvas 填满全屏 */
+        height: 100vh; /* canvas 填满全屏 */
+        border-radius: 0;  /* 去除圆角 */
+    }
+}
