@@ -1,5 +1,4 @@
 "use client";
-import { useEffect } from "react";
 import './gameLayout.css';
 import {
     initializeTetrisGame,
@@ -10,10 +9,20 @@ import {
     rotatePiece,
     pauseGame
 } from "./tetrisGame";
-
+import { useEffect, useRef } from "react";
 export default function Page() {
+    const audioRef = useRef(null);
     useEffect(() => {
         initializeTetrisGame();
+        // 播放背景音乐
+        const audio = audioRef.current;
+        if (audio) {
+            audio.volume = 0.3;
+            audio.play().catch(e => {
+                // 部分浏览器需用户交互后才能播放，忽略错误
+                console.log("Audio play blocked:", e);
+            });
+        }
 
         // 设置按钮点击事件
         const settingsBtn = document.getElementById("settings-btn");
@@ -77,6 +86,8 @@ export default function Page() {
 
     return (
         <main className="game-page-layout">
+            {/* 背景音乐 audio 标签 */}
+            <audio ref={audioRef} src="/sounds/sound_tetrisbgm.wav" loop />
             <div className="game-container">
                 <div className="game-box">
                     <div className="top-bar">
