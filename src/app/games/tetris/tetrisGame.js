@@ -1,4 +1,5 @@
 "use client";
+
 let canvas, ctx;
 let board = [];
 let currentPiece = null;
@@ -7,10 +8,9 @@ let score = 0;
 const ROWS = 20;
 const COLS = 10;
 const BLOCK_SIZE = 30;
-let isGamePause= false;
-console.log("Audio Path:", "/sounds/sound-hit.wav");
-// let dropSound = new Audio("/sounds/sound-hit.wav");
-// let clearLineSound = new Audio("/sounds/sound-win.wav");
+let isGamePause = false;
+let lastDropTime = 0;
+let dropDelay = 800;
 
 const COLORS = ["", "#FF5733", "#33C1FF", "#75FF33", "#FF33A6", "#FFD733", "#9D33FF", "#33FFBD"];
 const SHAPES = [
@@ -21,7 +21,7 @@ const SHAPES = [
     [[4, 4], [4, 4]],
     [[0, 5, 5], [5, 5, 0]],
     [[0, 6, 0], [6, 6, 6]],
-    [[7, 7, 0], [0, 7, 7]]
+    [[7, 7, 0], [0, 7, 7]],
 ];
 
 function createPiece() {
@@ -31,13 +31,12 @@ function createPiece() {
         x: Math.floor((COLS - shape[0].length) / 2),
         y: 0,
         shape,
-        type
+        type,
     };
 }
 
-
 function drawBoard() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // 清除整个画布
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
     for (let y = 0; y < ROWS; y++) {
         for (let x = 0; x < COLS; x++) {
             if (board[y][x]) {
@@ -67,18 +66,9 @@ function validMove(shape, offsetX, offsetY) {
         row.every((val, dx) => {
             const x = offsetX + dx;
             const y = offsetY + dy;
-            return (
-                !val ||
-                (x >= 0 && x < COLS && y < ROWS && (y < 0 || !board[y][x]))
-            );
+            return !val || (x >= 0 && x < COLS && y < ROWS && (y < 0 || !board[y][x]));
         })
     );
-}
-
-
-
-function playSound(sound) {
-    sound.play();
 }
 
 function mergePiece() {
@@ -88,22 +78,18 @@ function mergePiece() {
             if (val) board[y + dy][x + dx] = type;
         })
     );
-    // playSound(dropSound); // 播放掉落音效
 }
+
 function clearLines() {
     for (let y = ROWS - 1; y >= 0; y--) {
         if (board[y].every(cell => cell)) {
-            // 直接删除行，无闪烁效果
             board.splice(y, 1);
-            board.unshift(new Array(COLS).fill(0)); // 添加一个空行到顶部
-            score += 100; // 增加得分
-            // document.getElementById("score-display").innerText = "Score: " + score;
-
-            // playSound(clearLineSound); // 播放消除行音效
-            y++; // 重新检查当前行，避免跳过
+            board.unshift(new Array(COLS).fill(0)); // Add empty row at the top
+            score += 100;
+            y++; // Recheck the current row to avoid skipping
         }
     }
-    drawBoard(); // 更新游戏界面
+    drawBoard();
 }
 
 function drop() {
@@ -139,16 +125,12 @@ function rotate() {
 
 function endGame() {
     clearInterval(dropInterval);
-    isGamePause=true;
+    isGamePause = true;
     document.getElementById("game-over-screen").style.display = "flex";
 }
-let lastDropTime = 0;
-let dropDelay = 800;
 
 function gameLoop(timestamp) {
-    if(isGamePause){
-        return;
-    }
+    if (isGamePause) return;
     if (!lastDropTime) lastDropTime = timestamp;
     const delta = timestamp - lastDropTime;
 
@@ -158,28 +140,25 @@ function gameLoop(timestamp) {
     }
 
     drawBoard();
-    requestAnimationFrame(gameLoop); // 使用 requestAnimationFrame 保证动画流畅
+    requestAnimationFrame(gameLoop);
 }
 
 export function restartGame() {
-    isGamePause = false;  // 恢复游戏
+    isGamePause = false;
     document.getElementById("game-over-screen").style.display = "none";
-    initializeTetrisGame(); // 重新初始化游戏
+    initializeTetrisGame();
 }
 
-
-export function  initializeTetrisGame() {
+export function initializeTetrisGame() {
     canvas = document.getElementById("tetris-canvas");
     ctx = canvas.getContext("2d");
-    // 清空游戏面板和初始化变量
     board = [];
     for (let y = 0; y < ROWS; y++) board[y] = new Array(COLS).fill(0);
     currentPiece = createPiece();
-    score = 0;  // 重置得分
+    score = 0;
     drawBoard();
 
-    requestAnimationFrame(gameLoop); // ✅ 替代 setInterval
-
+    requestAnimationFrame(gameLoop);
     document.addEventListener("keydown", e => {
         if (e.key === "ArrowLeft" || e.key === "a") move(-1, 0);
         if (e.key === "ArrowRight" || e.key === "d") move(1, 0);
@@ -187,17 +166,19 @@ export function  initializeTetrisGame() {
         if (e.key === "z") rotate();
     });
 
-    canvas.addEventListener("click", rotate);
+    document.getElementById("rotate-btn").onclick = rotate;
 
-    const btnL = document.getElementById("left-btn");
-    const btnR = document.getElementById("right-btn");
-    const btnD = document.getElementById("down-btn");
-    const btnRot = document.getElementById("rotate-btn");
-
-    if (btnL) btnL.onclick = () => move(-1, 0);
-    if (btnR) btnR.onclick = () => move(1, 0);
-    if (btnD) btnD.onclick = () => move(0, 1);
-    if (btnRot) btnRot.onclick = rotate;
 }
 
-export default initializeTetrisGame;
+export function moveLeft() {
+    move(-1, 0);
+}
+export function moveRight() {
+    move(1, 0);
+}
+export function moveDown() {
+    move(0, 1);
+}
+export function rotatePiece() {
+    rotate();
+}
