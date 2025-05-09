@@ -89,28 +89,38 @@
 /* ===== 游戏结束提示框 ===== */
 #game-over-screen {
     display: none;
-    position: absolute;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0,0,0,0.8);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
     color: #fff;
-    padding: 20px;
-    border-radius: 10px;
+    z-index: 1001;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    z-index: 10;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 #game-over-screen button {
-    margin-top: 10px;
-    padding: 8px 16px;
-    background: #4CAF50;
+    margin: 10px auto 0;
+    padding: 10px 20px;
+    background: #FF7043;
     border: none;
-    color: white;
-    font-weight: bold;
     border-radius: 6px;
+    font-weight: bold;
+    font-size: 16px;
+    color: white;
     cursor: pointer;
 }
+
+#game-over-screen button:hover {
+    background-color: #FF5722;
+}
+
 
 /* ===== 移动端虚拟控制区域 ===== */
 .mobile-controls {

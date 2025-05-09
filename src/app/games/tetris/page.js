@@ -9,22 +9,31 @@ import {
     afterModeChange
 } from "./tetrisGame";
 
+
 export default function Page() {
     const [showSettings, setShowSettings] = useState(false);
     const [soundEnabled, setSoundEnabled] = useState(true);
     const [darkMode, setDarkMode] = useState(true);
+    const [showTitleScreen, setShowTitleScreen] = useState(true);
     const audioRef = useRef(null);
+    const [highScore, setHighScore] = useState(0);
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const stored = localStorage.getItem("highScore");
+            if (stored) setHighScore(Number(stored));
+        }
+    }, []);
+
     const initializedRef = useRef(false);
 
     useEffect(() => {
         if (!initializedRef.current) {
-            initializeTetrisGame();
             initializedRef.current = true;
 
             const tryPlay = () => {
                 if (audioRef.current && soundEnabled) {
                     audioRef.current.volume = 0.3;
-                    audioRef.current.play().catch(err => {});
+                    audioRef.current.play().catch(() => {});
                 }
                 document.removeEventListener("click", tryPlay);
                 document.removeEventListener("touchstart", tryPlay);
@@ -33,7 +42,6 @@ export default function Page() {
             document.addEventListener("touchstart", tryPlay);
         }
 
-        // 控制音效播放
         if (audioRef.current) {
             if (soundEnabled) {
                 audioRef.current.play().catch(() => {});
@@ -43,13 +51,21 @@ export default function Page() {
         }
     }, [soundEnabled]);
 
-    // 控制暗黑样式切换
+
     useEffect(() => {
-        let tetrisLayout = document.getElementById("tetrisLayout");
-        if(tetrisLayout){
+        if (!showTitleScreen) {
+            const timer = setTimeout(() => {
+                initializeTetrisGame();
+            }, 0);
+            return () => clearTimeout(timer);
+        }
+    }, [showTitleScreen]);
+
+    useEffect(() => {
+        const tetrisLayout = document.getElementById("tetrisLayout");
+        if (tetrisLayout) {
             tetrisLayout.classList.toggle("dark-mode", darkMode);
         }
-        // ✅ 修复 canvas 背景同步
         afterModeChange();
     }, [darkMode]);
 
@@ -58,38 +74,69 @@ export default function Page() {
         setShowSettings(true);
     };
 
+    const startGame = () => {
+        setShowTitleScreen(false);
+    };
+
+    const returnToTitle = () => {
+        const over = document.getElementById("game-over-screen");
+        if (over) over.style.display = "none";
+
+        const canvas = document.getElementById("tetris-canvas");
+        if (canvas) {
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        const scoreEl = document.getElementById("score-value");
+        if (scoreEl) scoreEl.textContent = "0";
+
+        setShowTitleScreen(true);
+    };
+
     return (
         <main className="game-page-layout">
             <audio ref={audioRef} src="/sounds/sound_tetris_bgm.ogg" loop />
 
-            <div className="game-container">
-                <div className="game-box">
-                    <div className="top-bar">
-                        <div className="next-piece-box">
-                            <canvas id="next-canvas" width="80" height="80"></canvas>
+            {showTitleScreen ? (
+                <div className="settings-modal">
+                    <div className="modal-content">
+                        <h2>俄罗斯方块</h2>
+                        <p>历史最高分: {highScore}</p>
+                        <button onClick={startGame}>开始游戏</button>
+                    </div>
+                </div>
+            ) : (
+                <div className="game-container">
+                    <div className="game-box">
+                        <div className="top-bar">
+                            <div className="next-piece-box">
+                                <canvas id="next-canvas" width="80" height="80"></canvas>
+                            </div>
+                            <div className="score-box">
+                                <p>Score: <span id="score-value">0</span></p>
+                                <button id="settings-btn" onClick={openSettings}>⚙️</button>
+                            </div>
                         </div>
-                        <div className="score-box">
-                            <p>Score: <span id="score-value">0</span></p>
-                            <button id="settings-btn" onClick={openSettings}>⚙️</button>
+                        <canvas id="tetris-canvas" width="300" height="600"></canvas>
+                    </div>
+
+                    <div id="game-over-screen">
+                        <p id="score-display">Score: 0</p>
+                        <button onClick={restartGame}>重新开始</button>
+                        <button onClick={returnToTitle}>返回标题</button>
+                    </div>
+
+                    <div className="mobile-controls">
+                        <div id="joystick-container" className="joystick-container">
+                            <div id="joystick-knob" className="joystick-knob"></div>
+                        </div>
+                        <div className="rotate-btn-wrap">
+                            <button id="rotate-btn">旋转</button>
                         </div>
                     </div>
-                    <canvas id="tetris-canvas" width="300" height="600"></canvas>
                 </div>
-
-                <div id="game-over-screen">
-                    <p id="score-display">Score: 0</p>
-                    <button onClick={restartGame}>重新开始</button>
-                </div>
-
-                <div className="mobile-controls">
-                    <div id="joystick-container" className="joystick-container">
-                        <div id="joystick-knob" className="joystick-knob"></div>
-                    </div>
-                    <div className="rotate-btn-wrap">
-                        <button id="rotate-btn">旋转</button>
-                    </div>
-                </div>
-            </div>
+            )}
 
             {showSettings && (
                 <div className="settings-modal">

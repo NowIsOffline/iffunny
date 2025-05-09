@@ -58,12 +58,10 @@ function drawBoard() {
     }
 }
 
-
 function IsDark(){
-    let tetrisLayout = document.getElementById("tetrisLayout");
-    return tetrisLayout?tetrisLayout.classList.contains("dark-mode"):false;
+    const tetrisLayout = document.getElementById("tetrisLayout");
+    return tetrisLayout?.classList.contains("dark-mode")
 }
-
 function drawBlock(x, y, type) {
     if (IsDark()) {
         const neonColors = ["", "#39ff14", "#00ffff", "#ff00ff", "#ffff00", "#ff5722", "#00e5ff", "#ff4081"];
@@ -125,9 +123,7 @@ function updateScoreDisplay() {
     if (scoreEl) {
         scoreEl.textContent = score.toString();
         // ✅ 分数到1000后加速
-        if(score>=3000){
-            dropDelay =200;
-        }else if (score >= 1000) {
+        if (score >= 1000) {
             dropDelay = 400;
         } else {
             dropDelay = 800;
@@ -137,32 +133,32 @@ function updateScoreDisplay() {
 }
 
 function drawNextPiece() {
-    const canvas = document.getElementById("next-canvas");
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const nextCanvas = document.getElementById("next-canvas");
+    if (!nextCanvas) return;
+    const nextPieceCtx = nextCanvas.getContext("2d");
+    nextPieceCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
     if (!nextPiece) return;
 
     const isDark = IsDark();
     const shape = nextPiece.shape;
     const type = nextPiece.type;
     const blockSize = 20;
-    const offsetX = (canvas.width - shape[0].length * blockSize) / 2;
-    const offsetY = (canvas.height - shape.length * blockSize) / 2;
+    const offsetX = (nextCanvas.width - shape[0].length * blockSize) / 2;
+    const offsetY = (nextCanvas.height - shape.length * blockSize) / 2;
 
     shape.forEach((row, y) => {
         row.forEach((val, x) => {
             if (val) {
                 if (isDark) {
                     const neonColors = ["", "#39ff14", "#00ffff", "#ff00ff", "#ffff00", "#ff5722", "#00e5ff", "#ff4081"];
-                    ctx.strokeStyle = neonColors[type];
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
+                    nextPieceCtx.strokeStyle = neonColors[type];
+                    nextPieceCtx.lineWidth = 2;
+                    nextPieceCtx.strokeRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
                 } else {
-                    ctx.fillStyle = COLORS[type];
-                    ctx.fillRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
-                    ctx.strokeStyle = "#000";
-                    ctx.strokeRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
+                    nextPieceCtx.fillStyle = COLORS[type];
+                    nextPieceCtx.fillRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
+                    nextPieceCtx.strokeStyle = "#000";
+                    nextPieceCtx.strokeRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
                 }
             }
         });
@@ -208,6 +204,13 @@ function endGame() {
     const scoreShow = document.getElementById("score-display");
     if (over) over.style.display = "flex";
     if (scoreShow) scoreShow.textContent = "Score: " + score;
+    if (typeof window !== "undefined") {
+        const currentHigh = Number(localStorage.getItem("highScore") || 0);
+        if (score > currentHigh) {
+            localStorage.setItem("highScore", score.toString());
+        }
+    }
+
 }
 
 function gameLoop(timestamp) {
@@ -278,6 +281,9 @@ export function resumeGame(){
 }
 
 export function afterModeChange(){
+    if(!ctx){
+        return
+    }
     drawBoard();
     drawNextPiece();
 }
