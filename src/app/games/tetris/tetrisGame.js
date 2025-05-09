@@ -12,7 +12,7 @@ const BLOCK_SIZE = 30;
 let isGamePause = false;
 let lastDropTime = 0;
 let dropDelay = 800;
-
+let onelineScore=100;
 // 🎵 音效播放器
 let dropSound, clearSound;
 
@@ -131,7 +131,11 @@ function updateScoreDisplay() {
     if (scoreEl) {
         scoreEl.textContent = score.toString();
         // ✅ 分数到1000后加速
-        if (score >= 1000) {
+        if(score>=30*onelineScore){
+            dropDelay = 100;
+        }else if(score>=20*onelineScore){
+            dropDelay = 200;
+        }else if (score >= 10*onelineScore) {
             dropDelay = 400;
         } else {
             dropDelay = 800;
