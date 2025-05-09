@@ -92,11 +92,9 @@
 }
 
 #bg-canvas {
-    z-index: 0; /* 背景层 */
 }
 
 #tetris-canvas {
-    z-index: 1; /* 方块游戏层 */
     pointer-events: none; /* 避免阻挡输入（可选） */
 }
 
