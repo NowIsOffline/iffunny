@@ -213,7 +213,7 @@ function endGame() {
     if (over) over.style.display = "flex";
     if (scoreShow) scoreShow.textContent = "Score: " + score;
     if (typeof window !== "undefined") {
-        const currentHigh = Number(localStorage.getItem("highScore") || 0);
+        const currentHigh = Number(localStorage.getItem("tetrisHighScore") || 0);
         if (score > currentHigh) {
             localStorage.setItem("highScore", score.toString());
         }

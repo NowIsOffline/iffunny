@@ -127,6 +127,10 @@ export default function PngToIconConverter() {
                       iconUrl="/icon/small/png2ico/png2ico.png"></HeadItem>
 
             <div className="min-h-screen bg-gray-50 text-gray-800 flex flex-col items-center justify-center p-4">
+                <h1>Free PNG to ICO Converter – Multi-size Icon Generator
+                </h1>
+                <h2>Convert PNG images to ICO files instantly. Support multiple sizes and batch download. 100% Free.
+                </h2>
                 <div className="max-w-lg w-full bg-white p-6 rounded-xl shadow-md text-center">
                     <div className="flex justify-between items-center mb-4">
                         <h1 className="text-2xl font-bold">{t.title}</h1>

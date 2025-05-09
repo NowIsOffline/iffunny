@@ -22,7 +22,7 @@ export default function Page() {
     const [highScore, setHighScore] = useState(0);
     useEffect(() => {
         if (typeof window !== "undefined") {
-            const stored = localStorage.getItem("highScore");
+            const stored = localStorage.getItem("tetrisHighScore");
             if (stored) setHighScore(Number(stored));
         }
     }, []);
