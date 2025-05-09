@@ -107,14 +107,17 @@ export default function Page() {
             {showTitleScreen ? (
                 <div className="settings-modal">
                     <div className="modal-content">
-                        <h2>俄罗斯方块</h2>
-                        <p>历史最高分: {highScore}</p>
-                        <button onClick={startGame}>开始游戏</button>
+                        <h1>Tetris Classic</h1>
+                        <p>High Score: {highScore}</p>
+                        <button onClick={startGame}>Start Game</button>
+                        <p className="seo-description">
+                            Play the classic Tetris puzzle game. Stack falling blocks and beat your high score!
+                        </p>
                     </div>
                 </div>
             ) : (
                 <div className="game-container">
-                    <div className="game-box">
+                <div className="game-box">
                         <div className="top-bar">
                             <div className="next-piece-box">
                                 <canvas id="next-canvas" width="80" height="80"></canvas>
@@ -129,8 +132,8 @@ export default function Page() {
 
                     <div id="game-over-screen">
                         <p id="score-display">Score: 0</p>
-                        <button onClick={restartGame}>重新开始</button>
-                        <button onClick={returnToTitle}>返回标题</button>
+                        <button onClick={restartGame}>Restart</button>
+                        <button onClick={returnToTitle}>Back to Title</button>
                     </div>
 
                     <div className="mobile-controls">
@@ -154,7 +157,7 @@ export default function Page() {
                                 checked={soundEnabled}
                                 onChange={() => setSoundEnabled(prev => !prev)}
                             />
-                            启用音效
+                            Enable Sound
                         </label>
                         <label>
                             <input
@@ -162,13 +165,13 @@ export default function Page() {
                                 checked={darkMode}
                                 onChange={() => setDarkMode(prev => !prev)}
                             />
-                            启用暗黑模式
+                            Enable Dark Mode
                         </label>
                         <button onClick={() => {
                             setShowSettings(false);
                             resumeGame();
                         }}>
-                            关闭
+                            Close
                         </button>
                     </div>
                 </div>
