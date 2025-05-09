@@ -16,7 +16,7 @@ import {
 export default function Page() {
     const [showSettings, setShowSettings] = useState(false);
     const [soundEnabled, setSoundEnabled] = useState(true);
-    const [darkMode, setDarkMode] = useState(true);
+    const [darkMode, setDarkMode] = useState(false);
     const [showTitleScreen, setShowTitleScreen] = useState(true);
     const audioRef = useRef(null);
     const [highScore, setHighScore] = useState(0);
@@ -117,7 +117,7 @@ export default function Page() {
                 </div>
             ) : (
                 <div className="game-container">
-                <div className="game-box">
+                    <div className="game-box">
                         <div className="top-bar">
                             <div className="next-piece-box">
                                 <canvas id="next-canvas" width="80" height="80"></canvas>
@@ -127,7 +127,10 @@ export default function Page() {
                                 <button id="settings-btn" onClick={openSettings}>⚙️</button>
                             </div>
                         </div>
-                        <canvas id="tetris-canvas" width="300" height="600"></canvas>
+                        <div className="canvas-wrapper">
+                            <canvas id="bg-canvas" width="300" height="600"></canvas>
+                            <canvas id="tetris-canvas" width="300" height="600"></canvas>
+                        </div>
                     </div>
 
                     <div id="game-over-screen">

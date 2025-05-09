@@ -10,7 +10,7 @@ export const metadata = {
 
 export default function TetrisReaderLayout({children}) {
     return (
-        <div id="tetrisLayout" className="dark-mode">
+        <div id="tetrisLayout">
             <HeadItem title="Tetris" iconUrl="/icon/small/tetris/tetris.png" />
             {children}
         </div>

@@ -40,8 +40,12 @@ function createPiece() {
 }
 
 function drawBoard() {
-    ctx.fillStyle = IsDark() ? "#000" : "#d7f0fa";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (IsDark()) {
+        ctx.fillStyle = "#000";
+        ctx.fillRect(0, 0, canvas.width, canvas.height); // ← 只在暗黑时清除背景
+    } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // ← 保留 bg-canvas 可见
+    }
     for (let y = 0; y < ROWS; y++) {
         for (let x = 0; x < COLS; x++) {
             if (board[y][x]) {
@@ -282,9 +286,18 @@ export function initializeTetrisGame() {
     clearSound = new Audio("/sounds/sound_tetris_clear.ogg");
     dropSound.volume = 0.4;
     clearSound.volume = 0.5;
+    const bgCanvas = document.getElementById('bg-canvas');
+    const bgCtx = bgCanvas.getContext('2d');
 
+    const bgImage = new Image();
+    bgImage.src = '/image/tetris_bg.png'; // 图片必须放在 public/image 目录
+
+    bgImage.onload = () => {
+        bgCtx.drawImage(bgImage, 0, 0, bgCanvas.width, bgCanvas.height);
+    };
 
     requestAnimationFrame(gameLoop);
+
  
 }
 
