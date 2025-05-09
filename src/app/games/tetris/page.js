@@ -6,6 +6,9 @@ import {
     restartGame,
     pauseGame,
     resumeGame,
+    moveRight,
+    moveDown,
+    moveLeft,
     afterModeChange
 } from "./tetrisGame";
 
@@ -49,6 +52,9 @@ export default function Page() {
                 audioRef.current.pause();
             }
         }
+
+       
+        
     }, [soundEnabled]);
 
 

@@ -40,7 +40,8 @@ function createPiece() {
 }
 
 function drawBoard() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = IsDark() ? "#000" : "#d7f0fa";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     for (let y = 0; y < ROWS; y++) {
         for (let x = 0; x < COLS; x++) {
             if (board[y][x]) {
@@ -56,6 +57,13 @@ function drawBoard() {
             })
         );
     }
+    // ✅ 在 drawBoard() 最后加这一段
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height - 1);  // 起点：最底部横向
+    ctx.lineTo(canvas.width, canvas.height - 1);  // 终点：右边底部
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = IsDark() ? "#444" : "#888";  // 暗黑/普通模式分色
+    ctx.stroke();
 }
 
 function IsDark(){
@@ -224,8 +232,36 @@ function gameLoop(timestamp) {
     drawBoard();
     requestAnimationFrame(gameLoop);
 }
-
+let controlsBound;
 export function initializeTetrisGame() {
+
+    canvas = document.getElementById("tetris-canvas");
+    if (!canvas) return;
+    ctx = canvas.getContext("2d");
+
+    if (!dropSound) {
+        dropSound = new Audio("/sounds/sound_tetris_drop.ogg");
+        dropSound.volume = 0.4;
+    }
+    if (!clearSound) {
+        clearSound = new Audio("/sounds/sound_tetris_clear.ogg");
+        clearSound.volume = 0.5;
+    }
+
+
+    if (!controlsBound) {
+        controlsBound = true;
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowLeft" || e.key === "a") moveLeft();
+            if (e.key === "ArrowRight" || e.key === "d") moveRight();
+            if (e.key === "ArrowDown" || e.key === "s") moveDown();
+            if (e.key === "z") rotate();
+        });
+        const rotBtn = document.getElementById("rotate-btn");
+        if (rotBtn) rotBtn.addEventListener("click", rotate);
+        AddTouchEvent();
+    }
+
     canvas = document.getElementById("tetris-canvas");
     ctx = canvas.getContext("2d");
     board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
@@ -243,26 +279,68 @@ export function initializeTetrisGame() {
     dropSound.volume = 0.4;
     clearSound.volume = 0.5;
 
+
     requestAnimationFrame(gameLoop);
-
-    document.addEventListener("keydown", e => {
-        if (e.key === "ArrowLeft" || e.key === "a") move(-1, 0);
-        if (e.key === "ArrowRight" || e.key === "d") move(1, 0);
-        if (e.key === "ArrowDown" || e.key === "s") move(0, 1);
-        if (e.key === "z") rotate();
-    });
-
-    const btnL = document.getElementById("left-btn");
-    const btnR = document.getElementById("right-btn");
-    const btnD = document.getElementById("down-btn");
-    const btnRot = document.getElementById("rotate-btn");
-
-    if (btnL) btnL.onclick = () => move(-1, 0);
-    if (btnR) btnR.onclick = () => move(1, 0);
-    if (btnD) btnD.onclick = () => move(0, 1);
-    if (btnRot) btnRot.onclick = rotate;
+ 
 }
 
+function AddTouchEvent() {
+    const knob = document.getElementById("joystick-knob");
+    const container = document.getElementById("joystick-container");
+    if (!knob || !container) return;
+
+    let startX = 0;
+    let startY = 0;
+    let lastMoveTime = 0;
+    const throttleDelay = 100;
+
+    container.addEventListener("touchstart", e => {
+        console.log("touchmove")
+        const touch = e.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+    });
+
+    container.addEventListener("touchmove", e => {
+        e.preventDefault();
+        const now = Date.now();
+        if (now - lastMoveTime < throttleDelay) return;
+        lastMoveTime = now;
+        console.log("touchmove")
+        const touch = e.touches[0];
+        const dx = touch.clientX - startX;
+        const dy = touch.clientY - startY;
+
+        const angle = Math.atan2(dy, dx);
+        const distance = Math.min(Math.sqrt(dx * dx + dy * dy), 30);
+        const offsetX = Math.cos(angle) * distance;
+        const offsetY = Math.sin(angle) * distance;
+
+        knob.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+
+        if (Math.abs(dx) > Math.abs(dy)) {
+            if (dx > 20) moveRight();
+            else if (dx < -20) moveLeft();
+        } else {
+            if (dy > 20) moveDown();
+        }
+    });
+
+    container.addEventListener("touchend", () => {
+        knob.style.transform = "translate(0, 0)";
+    });
+}
+
+
+export function moveLeft() {
+    move(-1, 0);
+}
+export function moveRight() {
+    move(1, 0);
+}
+export function moveDown() {
+    move(0, 1);
+}
 export function restartGame() {
     const over = document.getElementById("game-over-screen");
     if (over) over.style.display = "none";
