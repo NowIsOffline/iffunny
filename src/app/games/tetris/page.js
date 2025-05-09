@@ -141,7 +141,7 @@ export default function Page() {
                             <div id="joystick-knob" className="joystick-knob"></div>
                         </div>
                         <div className="rotate-btn-wrap">
-                            <button id="rotate-btn">旋转</button>
+                            <button id="rotate-btn">Rotate</button>
                         </div>
                     </div>
                 </div>
