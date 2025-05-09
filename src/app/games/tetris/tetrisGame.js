@@ -1,4 +1,3 @@
-
 "use client";
 
 let canvas, ctx;
@@ -13,6 +12,9 @@ const BLOCK_SIZE = 30;
 let isGamePause = false;
 let lastDropTime = 0;
 let dropDelay = 800;
+
+// 🎵 音效播放器
+let dropSound, clearSound;
 
 const COLORS = ["", "#FF5733", "#33C1FF", "#75FF33", "#FF33A6", "#FFD733", "#9D33FF", "#33FFBD"];
 const SHAPES = [
@@ -56,12 +58,26 @@ function drawBoard() {
     }
 }
 
-function drawBlock(x, y, type) {
-    ctx.fillStyle = COLORS[type];
-    ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-    ctx.strokeStyle = "#000";
-    ctx.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+
+function IsDark(){
+    let tetrisLayout = document.getElementById("tetrisLayout");
+    return tetrisLayout?tetrisLayout.classList.contains("dark-mode"):false;
 }
+
+function drawBlock(x, y, type) {
+    if (IsDark()) {
+        const neonColors = ["", "#39ff14", "#00ffff", "#ff00ff", "#ffff00", "#ff5722", "#00e5ff", "#ff4081"];
+        ctx.strokeStyle = neonColors[type];
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+    } else {
+        ctx.fillStyle = COLORS[type];
+        ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+        ctx.strokeStyle = "#000";
+        ctx.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+    }
+}
+
 
 function validMove(shape, offsetX, offsetY) {
     return shape.every((row, dy) =>
@@ -83,17 +99,22 @@ function mergePiece() {
 }
 
 function clearLines() {
-    let cleared = 0;
-    for (let y = ROWS - 1; y >= 0; y--) {
+    let linesToClear = [];
+    for (let y = 0; y < ROWS; y++) {
         if (board[y].every(cell => cell)) {
-            board.splice(y, 1);
-            board.unshift(new Array(COLS).fill(0));
-            cleared++;
-            y++;
+            linesToClear.push(y);
         }
     }
 
+    for (let i = 0; i < linesToClear.length; i++) {
+        board.splice(linesToClear[i], 1);
+        board.unshift(new Array(COLS).fill(0));
+    }
+
+    const cleared = linesToClear.length;
+
     if (cleared > 0) {
+        if (clearSound) clearSound.play();
         score += cleared * 100;
         updateScoreDisplay();
     }
@@ -103,6 +124,15 @@ function updateScoreDisplay() {
     const scoreEl = document.getElementById("score-value");
     if (scoreEl) {
         scoreEl.textContent = score.toString();
+        // ✅ 分数到1000后加速
+        if(score>=3000){
+            dropDelay =200;
+        }else if (score >= 1000) {
+            dropDelay = 400;
+        } else {
+            dropDelay = 800;
+        }
+
     }
 }
 
@@ -113,6 +143,7 @@ function drawNextPiece() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (!nextPiece) return;
 
+    const isDark = IsDark();
     const shape = nextPiece.shape;
     const type = nextPiece.type;
     const blockSize = 20;
@@ -122,10 +153,17 @@ function drawNextPiece() {
     shape.forEach((row, y) => {
         row.forEach((val, x) => {
             if (val) {
-                ctx.fillStyle = COLORS[type];
-                ctx.fillRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
-                ctx.strokeStyle = "#000";
-                ctx.strokeRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
+                if (isDark) {
+                    const neonColors = ["", "#39ff14", "#00ffff", "#ff00ff", "#ffff00", "#ff5722", "#00e5ff", "#ff4081"];
+                    ctx.strokeStyle = neonColors[type];
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
+                } else {
+                    ctx.fillStyle = COLORS[type];
+                    ctx.fillRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
+                    ctx.strokeStyle = "#000";
+                    ctx.strokeRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
+                }
             }
         });
     });
@@ -134,6 +172,7 @@ function drawNextPiece() {
 function drop() {
     if (!move(0, 1)) {
         mergePiece();
+        if (dropSound) dropSound.play();
         clearLines();
         currentPiece = nextPiece;
         nextPiece = createPiece();
@@ -194,6 +233,13 @@ export function initializeTetrisGame() {
     lastDropTime = 0;
     drawNextPiece();
     updateScoreDisplay();
+
+    // 初始化音效
+    dropSound = new Audio("/sounds/sound_tetris_drop.ogg");
+    clearSound = new Audio("/sounds/sound_tetris_clear.ogg");
+    dropSound.volume = 0.4;
+    clearSound.volume = 0.5;
+
     requestAnimationFrame(gameLoop);
 
     document.addEventListener("keydown", e => {
@@ -224,15 +270,14 @@ export function pauseGame() {
     isGamePause = true;
 }
 
-export function moveLeft() {
-    move(-1, 0);
+export function resumeGame(){
+    if (isGamePause) {
+        isGamePause = false;
+        requestAnimationFrame(gameLoop);
+    }
 }
-export function moveRight() {
-    move(1, 0);
-}
-export function moveDown() {
-    move(0, 1);
-}
-export function rotatePiece() {
-    rotate();
+
+export function afterModeChange(){
+    drawBoard();
+    drawNextPiece();
 }
