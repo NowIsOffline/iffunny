@@ -1,0 +1,4 @@
+#puzzle-container {
+    transform-origin: top left;
+    scale: 1; /* 将由 JS 动态设置 */
+}
