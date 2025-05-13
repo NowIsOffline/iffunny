@@ -50,7 +50,8 @@ const DEFAULT_SITES = [
     { id: 1, type: 'site', name: 'png2ico', url: '/tools/png2ico', logo: '/icon/png2ico.png', undeletable: true },
     { id: 2, type: 'site', name: 'TXT reader', url: '/tools/txtreader', logo: '/icon/education.png', undeletable: true },
     { id: 3, type: 'site', name: 'TetrisGame', url: '/games/tetris', logo: '/icon/tetris.png' ,undeletable: true},
-    // { id: 4, type: 'site', name: 'Puzzle', url: '/tools/puzzle', logo: '/icon/tetris.png' ,undeletable: true},
+    { id: 4, type: 'site', name: 'Choice-helper', url: '/tools/choice-helper', logo: '/icon/choice-helper.png' ,undeletable: true},
+    // { id: 5, type: 'site', name: 'Puzzle', url: '/tools/puzzle', logo: '/icon/tetris.png' ,undeletable: true},
 ];
 const AddIconModal = ({ show, onClose, onAdd }) => {
     const [newSiteName, setNewSiteName] = useState('');
