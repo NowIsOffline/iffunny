@@ -47,11 +47,11 @@ const isTouchDevice = () =>
 
 const backend = isTouchDevice() ? TouchBackend : HTML5Backend;
 const DEFAULT_SITES = [
-    { id: 1, type: 'site', name: 'png2ico', url: '/tools/png2ico', logo: '/icon/png2ico.png', undeletable: true },
-    { id: 2, type: 'site', name: 'TXT reader', url: '/tools/txtreader', logo: '/icon/education.png', undeletable: true },
-    { id: 3, type: 'site', name: 'TetrisGame', url: '/games/tetris', logo: '/icon/tetris.png' ,undeletable: true},
-    { id: 4, type: 'site', name: 'Choice-helper', url: '/tools/choice-helper', logo: '/icon/choice-helper.png' ,undeletable: true},
-    // { id: 5, type: 'site', name: 'Puzzle', url: '/tools/puzzle', logo: '/icon/tetris.png' ,undeletable: true},
+    { id: 1, type: 'site', name: 'Puzzle', url: '/tools/puzzle', logo: '/icon/puzzle.ico' ,undeletable: true},
+    { id: 2, type: 'site', name: 'TXT reader', url: '/tools/txtreader', logo: '/icon/education.ico', undeletable: true },
+    { id: 3, type: 'site', name: 'TetrisGame', url: '/games/tetris', logo: '/icon/tetris.ico' ,undeletable: true},
+    { id: 4, type: 'site', name: 'Choice-helper', url: '/tools/choice-helper', logo: '/icon/choice-helper.ico' ,undeletable: true},
+    { id: 5, type: 'site', name: 'png2ico', url: '/tools/png2ico', logo: '/icon/png2ico.ico', undeletable: true },
 ];
 const AddIconModal = ({ show, onClose, onAdd }) => {
     const [newSiteName, setNewSiteName] = useState('');
@@ -288,11 +288,11 @@ export default function DashboardPage() {
     return (
         <DndProvider backend={backend}>
             <main className="relative min-h-screen font-sans" onMouseUp={handleOuterDrop} onMouseMove={handleOuterDrop}>
-                <HeadItem title="If Funny" iconUrl="/icon/small/robot/favicon.png" />
+                <HeadItem title="If Funny" iconUrl="/icon/robot.ico" />
                 <Head>
                     <meta property="og:title" content="If funny" />
                     <meta property="og:description" content="Drag, group and manage your favorite websites on a personalized web dashboard. No login required." />
-                    <meta property="og:image" content="/icon/robot.png" />
+                    <meta property="og:image" content="/icon/robot.ico" />
                     <meta name="viewport" content="width=device-width, initial-scale=1" />
                 </Head>
 

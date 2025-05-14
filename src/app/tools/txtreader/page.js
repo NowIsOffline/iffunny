@@ -396,7 +396,7 @@ export default function TxtReader() {
     return (
         <div>
             <HeadItem title="TXT reader"
-                      iconUrl="/icon/small/education/education.png"></HeadItem>
+                      iconUrl="/icon/education.ico"></HeadItem>
             <div className="language-switcher">
                 <button
                     className={`lang-btn ${currentLanguage === 'en' ? 'active' : ''}`}

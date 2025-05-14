@@ -1,4 +1,12 @@
 #puzzle-container {
-    transform-origin: top left;
-    scale: 1; /* 将由 JS 动态设置 */
+    width: 100%;
+    max-width: 1000px;
+    max-height: 500px;
+    aspect-ratio: auto;
+    overflow: auto;
+    border: 1px solid #ccc;
+    background: #f8f8f8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

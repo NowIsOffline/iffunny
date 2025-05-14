@@ -36,7 +36,7 @@ export default function CustomDragLayer() {
     return (
         <div style={layerStyles}>
             <div style={getItemStyles(initialOffset, currentOffset)}>
-                <img src={item.logo || '/icon/robot.png'} alt="" className="w-10 h-10 rounded-xl shadow" />
+                <img src={item.logo || '/icon/robot.ico'} alt="" className="w-10 h-10 rounded-xl shadow" />
             </div>
         </div>
     );

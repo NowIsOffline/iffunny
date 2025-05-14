@@ -174,7 +174,7 @@ const IndexPage = () => {
     return (
         <div className="container">
             <HeadItem title="choice-helper"
-                      iconUrl="/icon/small/choice-helper/favicon.png"></HeadItem>
+                      iconUrl="/icon/choice-helper.ico"></HeadItem>
             <header role="banner">
                 <h1>{translations[currentLang].title}</h1>
                 <h2>{translations[currentLang].subtitle}</h2>

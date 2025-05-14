@@ -14,7 +14,7 @@ export const metadata = {
 const GameLayout = ({ children }) => {
     return (
         <div className="game-page-layout">
-            <HeadItem title="Funny Game" iconUrl="/icon/small/robot/favicon.png" />
+            <HeadItem title="Funny Game" iconUrl="/icon/robot.ico" />
             <Head>
                 <meta property="og:title" content="Funny Game"/>
                 <meta property="og:description" content="Play exciting games here!"/>

@@ -124,7 +124,7 @@ export default function PngToIconConverter() {
     return (
         <main>
             <HeadItem title="PNG to Multi-Size Icon Generator" 
-                      iconUrl="/icon/small/png2ico/png2ico.png"></HeadItem>
+                      iconUrl="/icon/png2ico.ico"></HeadItem>
 
             <div className="min-h-screen bg-gray-50 text-gray-800 flex flex-col items-center justify-center p-4">
                 <h1>Free PNG to ICO Converter – Multi-size Icon Generator

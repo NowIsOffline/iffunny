@@ -11,7 +11,7 @@ export default function Icon({ item, onDrop, onDelete, onOpenFolder }) {
 
     const iconBox = (
         <div className="w-20 h-20 flex items-center justify-center bg-white bg-opacity-80 rounded-2xl shadow-md border border-blue-200" onClick={() => item.type === 'folder' && onOpenFolder(item)}>
-            <img src={item.logo || '/icon/robot.png'} alt={item.name} className="w-10 h-10" />
+            <img src={item.logo || '/icon/robot.ico'} alt={item.name} className="w-10 h-10" />
         </div>
     );
 
