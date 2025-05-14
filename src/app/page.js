@@ -47,7 +47,7 @@ const isTouchDevice = () =>
 
 const backend = isTouchDevice() ? TouchBackend : HTML5Backend;
 const DEFAULT_SITES = [
-    { id: 1, type: 'site', name: 'Puzzle', url: '/tools/puzzle', logo: '/icon/puzzle.ico' ,undeletable: true},
+    { id: 1, type: 'site', name: 'Image to Puzzle', url: '/tools/puzzle', logo: '/icon/puzzle.ico' ,undeletable: true},
     { id: 2, type: 'site', name: 'TXT reader', url: '/tools/txtreader', logo: '/icon/education.ico', undeletable: true },
     { id: 3, type: 'site', name: 'TetrisGame', url: '/games/tetris', logo: '/icon/tetris.ico' ,undeletable: true},
     { id: 4, type: 'site', name: 'Choice-helper', url: '/tools/choice-helper', logo: '/icon/choice-helper.ico' ,undeletable: true},
