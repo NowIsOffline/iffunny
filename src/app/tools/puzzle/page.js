@@ -36,6 +36,7 @@ export default function Page() {
                 t ** 3 * p3[1];
             points.push([x, y]);
         }
+        points.push(p3);
         return points;
     }
 
