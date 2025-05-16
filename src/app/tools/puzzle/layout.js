@@ -5,7 +5,7 @@ export const metadata = {
     description: "Generate high-resolution jigsaw puzzles with curved Bezier edges. Customize rows, columns, curve strength, and download precise puzzle pieces.",
     viewport: "width=device-width, initial-scale=1.0",
     charSet: "UTF-8",
-    keywords: "puzzle generator, jigsaw maker, bezier puzzle, custom puzzle online, download puzzle pieces"
+    keywords: "online,puzzle generator, jigsaw maker, bezier puzzle, custom puzzle online, download puzzle pieces"
 };
 
 export default function PuzzleReaderLayout({children}) {
