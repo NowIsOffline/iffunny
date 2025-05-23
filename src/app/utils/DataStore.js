@@ -25,6 +25,7 @@ class DataStore {
         if (typeof window !== 'undefined') {
             localStorage.setItem('icons', JSON.stringify(this._icons));
             localStorage.setItem('otherCfg', JSON.stringify(this.OtherItemCfg));
+            localStorage.setItem('localSaveIconID', JSON.stringify(this.LocalSaveIconID)); // ✅ 保存 LocalSaveIconID
         }
     }
 
@@ -32,13 +33,16 @@ class DataStore {
         if (typeof window !== 'undefined') {
             const storedIcons = localStorage.getItem('icons');
             const storedCfg = localStorage.getItem('otherCfg');
-
+            const storedId = localStorage.getItem('localSaveIconID');
             if (storedIcons) {
                 this._icons = JSON.parse(storedIcons);
             }
 
             if (storedCfg) {
                 this.OtherItemCfg = JSON.parse(storedCfg);
+            }
+            if (storedId) {
+                this.LocalSaveIconID = JSON.parse(storedId); // ✅ 还原 LocalSaveIconID
             }
 
             if (this._icons.length === 0) {

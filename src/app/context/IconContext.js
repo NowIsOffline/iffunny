@@ -34,6 +34,7 @@ export function IconProvider({ children }) {
         dataStore.OtherItemCfg[createIconID] = newItem;
         const updated = [...icons, createIconID];
         dataStore.ICONS = updated;
+        dataStore.saveToLocal(); // ✅ 同步新 ID
     };
 
     return (
