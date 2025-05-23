@@ -36,12 +36,11 @@ const AddIconModal = ({ show, onClose }) => {
         const logo = `${base}/favicon.ico`;
 
         const newItem = {
-            type: 'item',
             name: trimmedName,
             url: trimmedUrl,
             logo: logo,
             iconType:"item",
-            openType: "internal",
+            openType: "link",
             stopDelete: false,
             createTime: ""
         };

@@ -22,9 +22,7 @@ class DataStore {
     }
 
     saveToLocal() {
-        console.log("saveToLocal")
         if (typeof window !== 'undefined') {
-            console.log("saveToLocal")
             localStorage.setItem('icons', JSON.stringify(this._icons));
             localStorage.setItem('otherCfg', JSON.stringify(this.OtherItemCfg));
         }
