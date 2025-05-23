@@ -1,6 +1,6 @@
-import "./globals.css";
 import GoogleCode from "@/app/googleCode";
 import React from "react";
+import styles from './style.css'
 
 
 
