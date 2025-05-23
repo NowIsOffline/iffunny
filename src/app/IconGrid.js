@@ -4,10 +4,7 @@ import { useIcons } from './context/IconContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import IconCard from '@/app/components/IconCard';
 import React, {useEffect, useState} from 'react';
-import CustomDragLayer from "@/app/components/CustomDragLayer";
-import dataStore from "@/app/utils/DataStore";
 import ShopModal from './components/ShopModal'; // 修改为实际路径
-import SHOP_SITE_CFG from './configs/shop';
 import FileViewerModal from "@/app/components/FileViewerModal"; // 你的配置
 
 const AddIconModal = ({ show, onClose }) => {
@@ -203,7 +200,6 @@ export default function IconGrid() {
                     </div>
                 </motion.div>
 
-                <CustomDragLayer/>
             </div>
            
         </div>

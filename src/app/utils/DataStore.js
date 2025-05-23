@@ -37,7 +37,6 @@ class DataStore {
             if (storedIcons) {
                 this._icons = JSON.parse(storedIcons);
             }
-
             if (storedCfg) {
                 this.OtherItemCfg = JSON.parse(storedCfg);
             }
@@ -106,6 +105,9 @@ class DataStore {
         const idx = this._icons.indexOf(id);
         if (idx !== -1) {
             this._icons.splice(idx, 1);
+            if(this.OtherItemCfg.hasOwnProperty(id)){
+                delete this.OtherItemCfg[id];
+            }
             this.saveToLocal();
             if (this._setIcons) {
                 this._setIcons([...this._icons]);
