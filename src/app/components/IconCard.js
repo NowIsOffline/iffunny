@@ -80,7 +80,6 @@ export default function IconCard({ iconId, index, iconsLength, moveIcon, setDrag
 
     drag(drop(ref));
     const handleClick = () => {
-        console.log(icon)
         if(icon.iconType==="file"){
             onOpenInternal?.(`#file:${icon.id}`);
         }else if (icon.openType === "link") {

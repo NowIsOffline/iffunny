@@ -18,7 +18,7 @@ export const SHOP_SITE_CFG = {
     name: "TetrisGame",
     desc: "俄罗斯方块小游戏",
     logo: "/icon/tetris.ico",
-    url: "https://yourdomain.com/tetris",
+    url: "/games/tetris",
     openType: "link",
     stopDelete: false,
     createTime: "2025-05-02T00:00:00"
@@ -29,7 +29,7 @@ export const SHOP_SITE_CFG = {
       name: "Image Puzzle",
       desc: "图像拼图生成器",
       logo: "/icon/puzzle.ico",
-      url: "https://yourdomain.com/puzzle",
+      url: "/tools/puzzle",
       openType: "link",
       stopDelete: false,
       createTime: "2025-05-03T00:00:00"
@@ -40,7 +40,7 @@ export const SHOP_SITE_CFG = {
       name: "PNG to ICO",
       desc: "图标转换工具",
       logo: "/icon/png2ico.ico",
-      url: "https://yourdomain.com/png-to-ico",
+      url: "/tools/png2ico",
       openType: "link",
       stopDelete: false,
       createTime: "2025-05-04T00:00:00"
@@ -51,7 +51,7 @@ export const SHOP_SITE_CFG = {
       name: "choice-helper",
       desc: "图标转换工具",
       logo: "/icon/choice-helper.ico",
-      url: "https://yourdomain.com/png-to-ico",
+      url: "/tools/choice-helper",
       openType: "link",
       stopDelete: false,
       createTime: "2025-05-04T00:00:00"
@@ -60,9 +60,9 @@ export const SHOP_SITE_CFG = {
         id:6,
       iconType:"item",
       name: "txt reader",
-      desc: "图标转换工具",
+      desc: "txt reader",
       logo: "/icon/education.ico",
-      url: "https://yourdomain.com/png-to-ico",
+      url: "/tools/txtreader",
       openType: "link",
       stopDelete: false,
       createTime: "2025-05-04T00:00:00"
