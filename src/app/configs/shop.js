@@ -66,5 +66,27 @@ export const SHOP_SITE_CFG = {
       openType: "link",
       stopDelete: false,
       createTime: "2025-05-04T00:00:00"
+    },
+    7:{
+        id:7,
+        iconType:"item",
+        name: "2048",
+        desc: "The 2048 Classic Game. This is the classic version of 2048 game. Join the numbers and get to the 2048 tile. Play 2048 online for free here.",
+        logo: "https://2048game.com/favicon.ico",
+        url: "https://2048game.com/",
+        openType: "link",
+        stopDelete: false,
+        createTime: "2025-05-04T00:00:00"
+    },
+    8:{
+        id:8,
+        iconType:"item",
+        name: "Sllides",
+        desc: " This is a modern variation of the classic ping pong game. It's free and online. Use the arrows of the keyboard to hit the ball(s). Play against GPT or a friend.",
+        logo: "https://sllides.com/favicon.png",
+        url: "https://sllides.com/",
+        openType: "link",
+        stopDelete: false,
+        createTime: "2025-05-04T00:00:00"
     }
 };
