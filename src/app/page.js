@@ -18,12 +18,13 @@ export default function Page() {
                 <meta property="og:title" content="If funny"/>
                 <meta property="og:description"
                       content="Drag, group and manage your favorite websites on a personalized web dashboard. No login required."/>
-                <meta property="og:image" content="/icon/robot.ico"/>
-                <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                <meta property="og:image" content="https://iffunny.com/path-to-image.png"/>
+                <meta property="og:url" content="https://iffunny.com/"/>
+                <meta property="og:type" content="website"/>
             </Head>
             <img src="/image/bg01.png" alt="Background" className="absolute inset-0 w-full h-full object-cover z-0"/>
             <div className="absolute inset-0 bg-white/30 backdrop-blur-md z-0"/>
-       
+
             <IconProvider className={"relative min-h-screen font-sans"}>
                 <IconGrid/>
             </IconProvider>
