@@ -24,7 +24,8 @@ export default function Page() {
                 <meta property="og:url" content="https://iffunny.com/"/>
                 <meta property="og:type" content="website"/>
             </Head>
-            <img src="/image/bg01.png" alt="Background" className="absolute inset-0 w-full h-full object-cover z-0"/>
+            <img src="https://picsum.photos/800/600" alt="Random Image" className="absolute inset-0 w-full h-full object-cover z-0"/>
+
             <div className="absolute inset-0 bg-white/30 backdrop-blur-md z-0"/>
 
             <IconProvider className={"relative min-h-screen font-sans"}>
