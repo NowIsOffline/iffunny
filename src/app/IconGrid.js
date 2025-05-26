@@ -114,7 +114,7 @@ export default function IconGrid() {
                 <header>
                     <div className="text-white text-3xl font-mono font-bold tracking-wider mb-1">{time}</div>
                     <h1 className="text-4xl font-bold text-white mb-2 drop-shadow">If Funny</h1>
-                    <h2 className="text-lg text-blue-100 italic drop-shadow">Drag icons to create folders</h2>
+                    <h2 className="text-lg text-blue-100 italic drop-shadow">Drag icons to create folders,long click to delete</h2>
                     <AddIconModal
                         show={showAddModal}
                         onClose={() => setShowAddModal(false)}
