@@ -10,8 +10,10 @@ import React, { useState } from "react";
 
 export default function Page() {
     // 直接使用三元表达式动态设置后端
-    const backend = /Mobi|Android/i.test(navigator.userAgent) ? TouchBackend : HTML5Backend;
-
+    let backend = HTML5Backend;
+    if (typeof window !== 'undefined') {
+        backend= /Mobi|Android/i.test(window.navigator.userAgent) ? TouchBackend :HTML5Backend;
+    }
     return (
         <DndProvider backend={backend}>
             <HeadItem title="If Funny" iconUrl="/icon/robot.ico"/>

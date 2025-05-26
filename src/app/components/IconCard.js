@@ -25,12 +25,13 @@ export default function IconCard({ iconId, index, iconsLength, moveIcon, setDrag
         logo: ''
     };
 
-    // 检测设备类型，判断是否为移动端
     useEffect(() => {
-        const isMobileDevice = /Mobi|Android/i.test(navigator.userAgent);
-        setIsMobile(isMobileDevice);
+        if (typeof window !== 'undefined') {  // Ensure it runs only in the browser
+            const isMobile = /Mobi|Android/i.test(window.navigator.userAgent);
+            setIsMobile(isMobile);
+        }
     }, []);
-
+    
     const [, drop] = useDrop({
         accept: 'ICON',
         hover(item, monitor) {
@@ -39,6 +40,32 @@ export default function IconCard({ iconId, index, iconsLength, moveIcon, setDrag
             const dragIndex = item.index;
             const hoverIndex = index;
             if (dragIndex === hoverIndex) return;
+            // const { left, right } = ref.current.getBoundingClientRect();
+            // const mouseX = monitor.getClientOffset().x;
+            // const EDGE_THRESHOLD = 12;
+            //
+            // const isLeftEdge = mouseX >= left && mouseX <= left + EDGE_THRESHOLD;
+            // const isRightEdge = mouseX >= right - EDGE_THRESHOLD;
+            // const isLast = hoverIndex === iconsLength - 1;
+            //
+            // let shouldInsert = false;
+            // let targetIndex = hoverIndex;
+            // if (isLeftEdge) {
+            //     shouldInsert = true;
+            // } else if (isLast && isRightEdge) {
+            //     shouldInsert = true;
+            //     targetIndex = hoverIndex + 1;
+            // } else {
+            //     return;
+            // }
+            //
+            // if (targetIndex === dragIndex || targetIndex === dragIndex + 1) return;
+            //
+            // clearTimeout(hoverTimer.current);
+            // hoverTimer.current = setTimeout(() => {
+            //     moveIcon(dragIndex, targetIndex);
+            //     item.index = targetIndex < dragIndex ? targetIndex : targetIndex - 1;
+            // }, 500);
         },
         drop: (item, monitor) => {
             setIsHovered(false);
