@@ -16,6 +16,7 @@ export default function FileViewerModal({ fileId, onClose, draggingId, setDraggi
             if (dataStore.OtherItemCfg[fileId]) {
                 dataStore.OtherItemCfg[fileId].name = tempName;
             }
+            dataStore.saveToLocal()
         }
     };
 
