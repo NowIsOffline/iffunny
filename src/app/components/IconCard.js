@@ -2,9 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { motion } from 'framer-motion';
 import dataStore from '../utils/DataStore';
+import {useIcons} from "@/app/context/IconContext";
 
 export default function IconCard({ iconId, index, iconsLength, moveIcon, setDraggingId, draggingId, onOpenInternal }) {
     const ref = useRef();
+    const { createFolderOrJoinIn } = useIcons();
+    
     const hoverTimer = useRef(null);
     const pressTimer = useRef(null); // 处理长按定时器
     const menuRef = useRef(); // 用于检测菜单点击
@@ -12,6 +15,7 @@ export default function IconCard({ iconId, index, iconsLength, moveIcon, setDrag
     const [dragging, setDragging] = useState(false);
     const [isLongPress, setIsLongPress] = useState(false); // 用于判断是否是长按触发的菜单
     const [isLongPressHandled, setIsLongPressHandled] = useState(false); // 用于控制是否已处理长按
+    const [isHovered, setIsHovered] = useState(false);
 
     const icon = dataStore.GetIconCfg(iconId) || {
         id: iconId,
@@ -23,39 +27,58 @@ export default function IconCard({ iconId, index, iconsLength, moveIcon, setDrag
         accept: 'ICON',
         hover(item, monitor) {
             if (!ref.current) return;
-
+            setIsHovered(true); // ✅ 开启放大
             const dragIndex = item.index;
             const hoverIndex = index;
             if (dragIndex === hoverIndex) return;
+            
+            // const { left, right } = ref.current.getBoundingClientRect();
+            // const mouseX = monitor.getClientOffset().x;
+            // const EDGE_THRESHOLD = 12;
+            //
+            // const isLeftEdge = mouseX >= left && mouseX <= left + EDGE_THRESHOLD;
+            // const isRightEdge = mouseX >= right - EDGE_THRESHOLD;
+            // const isLast = hoverIndex === iconsLength - 1;
+            //
+            // let shouldInsert = false;
+            // let targetIndex = hoverIndex;
+            // if (isLeftEdge) {
+            //     shouldInsert = true;
+            // } else if (isLast && isRightEdge) {
+            //     shouldInsert = true;
+            //     targetIndex = hoverIndex + 1;
+            // } else {
+            //     return;
+            // }
+            //
+            // if (targetIndex === dragIndex || targetIndex === dragIndex + 1) return;
+            //
+            // clearTimeout(hoverTimer.current);
+            // hoverTimer.current = setTimeout(() => {
+            //     // moveIcon(dragIndex, targetIndex);
+            //     // item.index = targetIndex < dragIndex ? targetIndex : targetIndex - 1;
+            // }, 500);
+        },
+        drop: (item, monitor) => {
+            setIsHovered(false);
+            clearTimeout(hoverTimer.current);
 
-            const { left, right } = ref.current.getBoundingClientRect();
-            const mouseX = monitor.getClientOffset().x;
-            const EDGE_THRESHOLD = 12;
-
-            const isLeftEdge = mouseX >= left && mouseX <= left + EDGE_THRESHOLD;
-            const isRightEdge = mouseX >= right - EDGE_THRESHOLD;
-            const isLast = hoverIndex === iconsLength - 1;
-
-            let shouldInsert = false;
-            let targetIndex = hoverIndex;
-            if (isLeftEdge) {
-                shouldInsert = true;
-            } else if (isLast && isRightEdge) {
-                shouldInsert = true;
-                targetIndex = hoverIndex + 1;
-            } else {
+            const sourceId = item.id;      // 拖拽源的 ID
+            const targetId = icon.id;      // 当前被悬停目标的 ID
+            var sourceCfg = dataStore.GetIconCfg(sourceId);
+            if(sourceCfg.iconType === "file"){
                 return;
             }
-
-            if (targetIndex === dragIndex || targetIndex === dragIndex + 1) return;
-
-            clearTimeout(hoverTimer.current);
-            hoverTimer.current = setTimeout(() => {
-                // moveIcon(dragIndex, targetIndex);
-                // item.index = targetIndex < dragIndex ? targetIndex : targetIndex - 1;
-            }, 500);
+            if (sourceId !== targetId) {
+                createFolderOrJoinIn(sourceId, targetId); // ✅ 调用上下文封装方法
+            }
         },
-        drop: () => clearTimeout(hoverTimer.current)
+
+        collect: (monitor) => {
+            if (!monitor.isOver({ shallow: true })) {
+                setIsHovered(false); // ✅ 当鼠标离开时取消放大
+            }
+        }
     });
 
     const [{ isDragging }, drag, preview] = useDrag({
@@ -63,11 +86,15 @@ export default function IconCard({ iconId, index, iconsLength, moveIcon, setDrag
         collect: monitor => ({
             isDragging: monitor.isDragging()
         }),
-        item: () => {
-            setDraggingId(icon.id);
-            setDragging(true);
-            return { index, id: icon.id };
-        },
+            item: () => {
+                setDraggingId(icon.id);
+                setDragging(true);
+
+                // 🧹 取消长按定时器，防止触发菜单
+                clearTimeout(pressTimer.current);
+
+                return { index, id: icon.id };
+            },
         end: () => {
             setDraggingId(null);
             setDragging(false);
@@ -75,13 +102,6 @@ export default function IconCard({ iconId, index, iconsLength, moveIcon, setDrag
         }
     });
 
-    useEffect(() => {
-        if (typeof window !== 'undefined' && typeof Image !== 'undefined') {
-            const img = new window.Image();
-            img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
-            preview(img, { captureDraggingState: true });
-        }
-    }, [preview]);
 
     // 点击外部区域隐藏菜单
     useEffect(() => {
@@ -137,7 +157,10 @@ export default function IconCard({ iconId, index, iconsLength, moveIcon, setDrag
 
     return (
         <motion.div
-            ref={ref}
+            ref={node => {
+                ref.current = node;
+                drag(drop(node)); // 正确绑定拖拽源 + 拖拽目标
+            }}
             onMouseDown={handlePressStart} // 监听按下事件
             onMouseUp={handlePressEnd} // 监听释放事件
             layout
@@ -147,25 +170,26 @@ export default function IconCard({ iconId, index, iconsLength, moveIcon, setDrag
                 width: '5rem',
                 height: '6rem',
                 display: 'flex',
+                backgroundColor: 'transparent',
                 flexWrap: 'wrap',
                 justifyContent: 'center',
             }}
             initial={{ scale: 1 }}
-            animate={{ scale: isDragging ? 0.8 : 1 }}
+            animate={{ scale: isDragging ? 0.8 : isHovered ? 1.1 : 1 }}
+
             className={"text-center"}
         >
             {icon.iconType === "item" ? (
                 <div style={{
                     width: '4rem',
                     height: '4rem',
-                    backgroundColor: 'white',
+                    backgroundColor: 'transparent',
                     borderRadius: '0.75rem',
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
                 }}>
-                    <img src={icon.logo} alt={icon.name} width="40" height="40" />
+                    <img src={icon.logo} alt={icon.name} width="100%" height="40" draggable={false}/>
                 </div>
             ) : (
                 <div style={{
@@ -188,6 +212,7 @@ export default function IconCard({ iconId, index, iconsLength, moveIcon, setDrag
                                 src={subIconCfg.logo}
                                 alt={`${subIconCfg.name} ${i}`}
                                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                draggable={false}
                             />
                         );
                     })}

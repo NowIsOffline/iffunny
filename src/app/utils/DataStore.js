@@ -75,13 +75,13 @@ class DataStore {
     get InstallIcons() {
         let installIconId = [];
         for (let i = 0; i < this._icons.length; i++) {
-            if (this._icons[i] < this.LocalSaveIconID) {
+            if (this._icons[i] < this.NormalItemNum) {
                 installIconId.push(this._icons[i]);
             } else {
                 const iconCfg = this.GetIconCfg(this._icons[i]);
                 if (iconCfg && iconCfg.iconType === "file") {
                     for (let j = 0; j < iconCfg.itemArr.length; j++) {
-                        if (iconCfg.itemArr[j] < this.LocalSaveIconID) {
+                        if (iconCfg.itemArr[j] < this.NormalItemNum) {
                             installIconId.push(iconCfg.itemArr[j]);
                         }
                     }
@@ -102,8 +102,10 @@ class DataStore {
     }
 
     TryRemoveIcon(id) {
+        console.log(id)
         const idx = this._icons.indexOf(id);
         if (idx !== -1) {
+            console.log("idx !== -1")
             this._icons.splice(idx, 1);
             if(this.OtherItemCfg.hasOwnProperty(id)){
                 delete this.OtherItemCfg[id];
@@ -118,6 +120,7 @@ class DataStore {
         const updatedIcons = [];
         for (let iconId of this._icons) {
             const cfg = this.GetIconCfg(iconId);
+            console.log(cfg)
             if (cfg && cfg.iconType === 'file') {
                 const indexInArr = cfg.itemArr.indexOf(id);
                 if (indexInArr !== -1) {
@@ -129,6 +132,8 @@ class DataStore {
                         updatedIcons.push(iconId);
                     }
                     break;
+                }else{
+                    updatedIcons.push(iconId);
                 }
             } else {
                 updatedIcons.push(iconId);
@@ -140,6 +145,56 @@ class DataStore {
         if (this._setIcons) {
             this._setIcons([...this._icons]);
         }
+    }
+
+    CreateFolderOrJoinIn(targetID, toID) {
+        // 检查两个 ID 是否都在主图标列表中
+        if (!this._icons.includes(targetID) || !this._icons.includes(toID)) {
+            return false;
+        }
+
+        const targetCfg = this.GetIconCfg(targetID);
+        const toCfg = this.GetIconCfg(toID);
+
+        if (toCfg.iconType === "file") {
+            // ✅ 将 targetID 加入已有文件夹中
+            if (!toCfg.itemArr.includes(targetID)) {
+                toCfg.itemArr.push(targetID);
+            }
+
+            // 移除 targetID
+            const index = this._icons.indexOf(targetID);
+            if (index !== -1) this._icons.splice(index, 1);
+
+        } else {
+            // ✅ 创建新的文件夹（组合图标）
+            const newID = this.LocalSaveIconID++;
+            const newCfg = {
+                id: newID,
+                name: "New Group",
+                logo: "", // 可自定义
+                iconType: "file",
+                itemArr: [toID, targetID]
+            };
+
+            this.OtherItemCfg[newID] = newCfg;
+
+            // 移除原始图标
+            this._icons = this._icons.filter(id => id !== targetID && id !== toID);
+
+            // 添加新图标
+            this._icons.push(newID);
+        }
+
+        this.saveToLocal();
+        if (this._setIcons) {
+            this._setIcons([...this._icons]);
+        }
+
+        return true;
+    }
+    GetIconId(index){
+        return this._icons[index]
     }
 }
 

@@ -37,9 +37,24 @@ export function IconProvider({ children }) {
         dataStore.saveToLocal(); // ✅ 同步新 ID
     };
 
+    const createFolderOrJoinIn = (targetID, toID) => {
+        const success = dataStore.CreateFolderOrJoinIn(targetID, toID);
+        if (success) {
+            setIcons([...dataStore.ICONS]); // ✅ 主动刷新视图
+        }
+        return success;
+    };
+
+
     return (
-        <IconContext.Provider value={{ icons, setIcons, moveIcon, tryAddCustomItem }}>
-            {children}
+        <IconContext.Provider value={{
+            icons,
+            setIcons,
+            moveIcon,
+            tryAddCustomItem,
+            createFolderOrJoinIn // ✅ 新增方法暴露
+        }}>
+        {children}
         </IconContext.Provider>
     );
 }
