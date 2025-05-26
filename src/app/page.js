@@ -1,17 +1,19 @@
-// page.js
 'use client';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';  // 导入 TouchBackend
 import { IconProvider } from './context/IconContext';
 import IconGrid from './IconGrid';
 import HeadItem from "@/app/headItem";
 import Head from "next/head";
-import React, {useEffect, useState} from "react";
+import React, { useState } from "react";
 
 export default function Page() {
+    // 直接使用三元表达式动态设置后端
+    const backend = /Mobi|Android/i.test(navigator.userAgent) ? TouchBackend : HTML5Backend;
 
     return (
-        <DndProvider backend={HTML5Backend}>
+        <DndProvider backend={backend}>
             <HeadItem title="If Funny" iconUrl="/icon/robot.ico"/>
             <Head>
                 <link rel="canonical" href="https://iffunny.com/"/>
