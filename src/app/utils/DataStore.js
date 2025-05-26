@@ -123,6 +123,7 @@ class DataStore {
             console.log(cfg)
             if (cfg && cfg.iconType === 'file') {
                 const indexInArr = cfg.itemArr.indexOf(id);
+                console.log(`indexInArr${indexInArr}`)
                 if (indexInArr !== -1) {
                     cfg.itemArr.splice(indexInArr, 1);
                     if (cfg.itemArr.length === 1) {
@@ -131,7 +132,6 @@ class DataStore {
                     } else if (cfg.itemArr.length > 1) {
                         updatedIcons.push(iconId);
                     }
-                    break;
                 }else{
                     updatedIcons.push(iconId);
                 }
@@ -139,7 +139,7 @@ class DataStore {
                 updatedIcons.push(iconId);
             }
         }
-
+        console.log(updatedIcons)
         this._icons = updatedIcons;
         this.saveToLocal();
         if (this._setIcons) {
