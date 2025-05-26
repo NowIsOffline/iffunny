@@ -1,36 +1,25 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 📱 If Funny 图标系统
+网址：https://iffunny.com/
+---
 
-## Getting Started
+## 🧭 项目目标
 
-First, run the development server:
+打造一个仿手机桌面的图标管理界面（React + Next.js），实现图标添加、合并、排序与状态持久化，适配移动端交互体验。
+多类型，自定义。
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🧩 图标类型与结构
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### 1. 普通图标
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 2. 自定义图标
+- 用户通过添加操作输入 `name + url` 生成
+- 可卸载，支持后续拖入图标集
 
-## Learn More
+### 3. 图标集 / 文件夹
+- 拖拽两个图标合并创建
 
-To learn more about Next.js, take a look at the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+##商店
+###默认网站供用户选择
