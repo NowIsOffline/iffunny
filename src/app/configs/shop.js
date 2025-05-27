@@ -39,7 +39,7 @@ export const SHOP_SITE_CFG = {
       iconType:"item",
       name: "PNG to ICO",
       desc: "Convert PNG to ICO online for free. Support multiple icon sizes (16x16, 32x32, 48x48, 256x256), batch upload and download. No login, no watermark. Fast, clean, and bilingual (English",
-      logo: "/icon/png2ico.ico",
+      logo: "https://www.png2ico.com/images/favicon.ico",
       url: "/tools/png2ico",
       openType: "link",
       stopDelete: false,
