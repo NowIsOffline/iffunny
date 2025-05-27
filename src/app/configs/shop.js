@@ -73,7 +73,7 @@ export const SHOP_SITE_CFG = {
         name: "2048",
         desc: "The 2048 Classic Game. This is the classic version of 2048 game. Join the numbers and get to the 2048 tile. Play 2048 online for free here.",
         logo: "https://2048game.com/favicon.ico",
-        url: "https://2048game.com/",
+        url: "/games/2048",
         openType: "link",
         stopDelete: false,
         createTime: "2025-05-04T00:00:00"
