@@ -17,7 +17,7 @@ export default function ShopModal({ onClose }) {
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
             <div className="bg-white rounded-xl shadow-lg w-[32rem] max-h-[80vh] p-4">
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-bold">Shop</h2>
+                    <h2 className="text-xl font-bold">Funny WebSite</h2>
                     <button onClick={onClose} className="text-gray-500 hover:text-black text-xl">×</button>
                 </div>
                 {/* Add fixed height and scrolling to only the list */}
