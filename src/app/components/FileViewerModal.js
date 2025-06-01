@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import dataStore from '../utils/DataStore';
 import IconCard from './IconCard';
 
-export default function FileViewerModal({ fileId, onClose, draggingId, setDraggingId, moveIcon }) {
+export default function FileViewerModal({ fileId, onClose, draggingId, setDraggingId, moveIcon ,setShowShop}) {
     const cfg = dataStore.GetIconCfg(fileId);
     if (!cfg || !cfg.itemArr || cfg.itemArr.length === 0) return null;
 
@@ -55,7 +55,11 @@ export default function FileViewerModal({ fileId, onClose, draggingId, setDraggi
                             moveIcon={moveIcon}
                             draggingId={draggingId}
                             setDraggingId={setDraggingId}
-                            onOpenInternal={() => {}}
+                            onOpenInternal={(url) => {
+                                if (url === '#shop') {
+                                    setShowShop(true);
+                                }
+                            }}
                         />
                     ))}
                 </div>

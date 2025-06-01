@@ -108,6 +108,9 @@ export default function IconGrid() {
         }
     };
 
+    const tryOpenShop=()=>{
+        setShowShop(true);
+    }
     return (
         <div>
             <div className="relative text-center flex flex-col min-h-screen">
@@ -129,6 +132,10 @@ export default function IconGrid() {
                             draggingId={draggingId}
                             setDraggingId={setDraggingId}
                             moveIcon={moveIcon}
+                            setShowShop={()=>{
+                                setOpenFileId(null)
+                                setShowShop(true);
+                            }}
                         />
                     )}
 
@@ -156,7 +163,9 @@ export default function IconGrid() {
                                 draggingId={draggingId}
                                 onOpenInternal={(url) => {
                                     console.log(url)
-                                    if (url === '#shop') setShowShop(true);
+                                    if (url === '#shop') {
+                                        setShowShop(true);
+                                    }
                                     else if (url.startsWith('#file:')) {
                                         const fileId = parseInt(url.split(':')[1]);
                                         setOpenFileId(fileId);

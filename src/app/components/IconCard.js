@@ -144,7 +144,6 @@ export default function IconCard({ iconId, index, iconsLength, moveIcon, setDrag
 
     const handleClick = () => {
         if (isLongPressHandled) return; // 如果长按已处理，不执行点击事件
-
         // 执行正常点击事件
         if (icon.iconType === "file") {
             onOpenInternal?.(`#file:${icon.id}`);
