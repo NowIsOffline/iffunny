@@ -45,7 +45,7 @@ class DataStore {
             }
 
             if (this._icons.length === 0) {
-                this._icons = Object.keys(SHOP_SITE_CFG).map(id => parseInt(id));
+                this._icons = [1];
                 this.saveToLocal();
             }
         }

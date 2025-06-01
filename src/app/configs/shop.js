@@ -88,5 +88,16 @@ export const SHOP_SITE_CFG = {
         openType: "link",
         stopDelete: false,
         createTime: "2025-05-04T00:00:00"
+    },
+    9:{
+        id:9,
+        iconType:"item",
+        name: "Thespruce",
+        desc: "Browse beautiful home design ideas and useful how-tos to make your best home. Our expert advice makes creating the home you've always wanted easy and fun./Chinese).",
+        logo: "https://www.thespruce.com/favicon.ico",
+        url: "https://www.thespruce.com/",
+        openType: "link",
+        stopDelete: false,
+        createTime: "2025-05-04T00:00:00"
     }
 };
