@@ -4,7 +4,7 @@ export const SHOP_SITE_CFG = {
   1:{
       id:1,
     iconType:"item",
-    name: "Shop",
+    name: "Funny WebSite",
     desc: "应用商店",
     logo: "/icon/store.png",
     url: "#shop",
