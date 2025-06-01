@@ -98,6 +98,6 @@ export const SHOP_SITE_CFG = {
         url: "https://www.thespruce.com/",
         openType: "link",
         stopDelete: false,
-        createTime: "2025-05-04T00:00:00"
+        createTime: "2025-06-01T00:00:00"
     }
 };
