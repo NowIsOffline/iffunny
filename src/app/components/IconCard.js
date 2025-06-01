@@ -4,6 +4,8 @@ import { useDrag, useDrop } from 'react-dnd';
 import { motion } from 'framer-motion';
 import dataStore from '../utils/DataStore';
 import { useIcons } from "@/app/context/IconContext";
+import {HTML5Backend} from "react-dnd-html5-backend";
+import {TouchBackend} from "react-dnd-touch-backend";
 
 export default function IconCard({ iconId, index, iconsLength, moveIcon, setDraggingId, draggingId, onOpenInternal }) {
     const ref = useRef();
@@ -122,6 +124,35 @@ export default function IconCard({ iconId, index, iconsLength, moveIcon, setDrag
         };
     }, [menuVisible]);
 
+    const handlePCPressStart = () => {
+        if(isMobile){
+            return
+        }
+        handlePressStart();
+    };   
+    const handlePCPressEnd = () => {
+        if(isMobile){
+            return
+        }
+        handlePressEnd();
+    };
+
+
+    const handleMobilePressStart = () => {
+        if(!isMobile){
+            return
+        }
+        handlePressStart();
+    };
+    const handleMobilePressEnd = () => {
+        if(!isMobile){
+            return
+        }
+        handlePressEnd();
+    };
+
+
+
     const handlePressStart = () => {
         // 处理长按1秒
         pressTimer.current = setTimeout(() => {
@@ -138,11 +169,14 @@ export default function IconCard({ iconId, index, iconsLength, moveIcon, setDrag
         if (isLongPress) {
             setIsLongPressHandled(true); // 设置为已处理长按
         } else {
+            console.log("handlePressEnd")
             handleClick(); // 长按未触发，执行点击
         }
     };
 
     const handleClick = () => {
+        console.log("handleClick")
+        
         if (isLongPressHandled) return; // 如果长按已处理，不执行点击事件
         // 执行正常点击事件
         if (icon.iconType === "file") {
@@ -159,6 +193,7 @@ export default function IconCard({ iconId, index, iconsLength, moveIcon, setDrag
         dataStore.TryRemoveIcon(iconId); // 执行卸载逻辑
         setMenuVisible(false); // 隐藏菜单
     };
+    
 
     return (
         <motion.div
@@ -167,8 +202,10 @@ export default function IconCard({ iconId, index, iconsLength, moveIcon, setDrag
                 drag(drop(node)); // 正确绑定拖拽源 + 拖拽目标
             }}
             layout
-            onMouseDown={handlePressStart} // 监听按下事件
-            onMouseUp={handlePressEnd} // 监听释放事件
+            onMouseDown={handlePCPressStart} // 监听按下事件
+            onMouseUp={handlePCPressEnd} // 监听释放事件
+            onTouchStart={handleMobilePressStart} // 手机端触摸事件
+            onTouchEnd={handleMobilePressEnd} // 手机端触摸事件
             style={{
                 position: 'relative',
                 margin: '0',
@@ -193,7 +230,24 @@ export default function IconCard({ iconId, index, iconsLength, moveIcon, setDrag
                     alignItems: 'center',
                     justifyContent: 'center'
                 }}>
-                    <img src={icon.logo} alt={icon.name} width="100%" height="40" draggable={false}/>
+                    <div
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            backgroundColor: 'transparent',
+                            zIndex: 2, // 遮罩层在图片上方
+                        }}
+                    />
+                    <img
+                        src={icon.logo}
+                        alt={icon.name}
+                        width="100%"
+                        height="40"
+                        draggable={false}
+                    />
                 </div>
             ) : (
                 <div style={{
