@@ -18,7 +18,6 @@ export default function Page() {
         <DndProvider backend={backend}>
             <HeadItem title="If Funny" iconUrl="/icon/robot.ico"/>
             <Head>
-                <link rel="canonical" href="https://iffunny.com/"/>
                 <meta property="og:title" content="If funny"/>
                 <meta property="og:description"
                       content="Drag, group and manage your favorite websites on a personalized web dashboard. No login required."/>

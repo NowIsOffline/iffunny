@@ -13,6 +13,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
       <html lang="en">
+      <head>
+          <link rel="canonical" href="https://iffunny.com/"/>
+      </head>
       <body
       >
       <GoogleCode></GoogleCode>
