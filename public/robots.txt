@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://iffunny.com/
+
+# Sitemaps
+Sitemap: https://iffunny.com/sitemap.xml
