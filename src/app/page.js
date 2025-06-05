@@ -16,7 +16,7 @@ export default function Page() {
     }
     return (
         <DndProvider backend={backend}>
-            <HeadItem title="If Funny" iconUrl="/icon/robot.ico"/>
+            <HeadItem title="If Funny" iconUrl="/favicon.ico"/>
             <Head>
                 <meta property="og:title" content="If funny"/>
                 <meta property="og:description"
