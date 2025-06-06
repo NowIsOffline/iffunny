@@ -93,11 +93,22 @@ export const SHOP_SITE_CFG = {
         id:9,
         iconType:"item",
         name: "Thespruce",
-        desc: "Browse beautiful home design ideas and useful how-tos to make your best home. Our expert advice makes creating the home you've always wanted easy and fun./Chinese).",
+        desc: "Browse beautiful home design ideas and useful how-tos to make your best home. Our expert advice makes creating the home you've always wanted easy and fun.",
         logo: "https://www.thespruce.com/favicon.ico",
         url: "https://www.thespruce.com/",
         openType: "link",
         stopDelete: false,
         createTime: "2025-06-01T00:00:00"
+    },
+    10:{
+        id:10,
+        iconType:"item",
+        name: "Joker3 compose",
+        desc: "Dragon Quest Monsters Joker 3 Professional - Synthesis list",
+        logo: "https://ssl.gstatic.com/docs/spreadsheets/spreadsheets_2023q4.ico",
+        url: "https://docs.google.com/spreadsheets/d/1k0of6tzFyWNZJu2j9y4jkW6B-HXpEsSKYTFQu9DIK5g/edit?pli=1&gid=1031609132#gid=1031609132",
+        openType: "link",
+        stopDelete: false,
+        createTime: "2025-06-06T00:00:00"
     }
 };
