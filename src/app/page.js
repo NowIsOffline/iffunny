@@ -27,7 +27,7 @@ export default function Page() {
             </Head>
             <img src="https://picsum.photos/200/300/?blur" alt="Random Image" className="absolute inset-0 w-full h-full object-cover z-0"/>
 
-            <div className="absolute inset-0 bg-white/30 backdrop-blur-md z-0"/>
+            <div className="absolute inset-0 bg-black/30 backdrop-blur-md z-0"/>
 
             <IconProvider className={"relative min-h-screen font-sans"}>
                 <IconGrid/>
