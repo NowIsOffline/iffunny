@@ -110,5 +110,16 @@ export const SHOP_SITE_CFG = {
         openType: "link",
         stopDelete: false,
         createTime: "2025-06-06T00:00:00"
+    },
+    11:{
+        id:11,
+        iconType:"item",
+        name: "hanime",
+        desc: "Watch hentai online free download HD on mobile phone tablet laptop desktop.  Stream online, regularly released uncensored, subbed, in 720p and 1080p!",
+        logo: "https://hanime.tv/favicon.png",
+        url: "/tools/hanime",
+        openType: "link",
+        stopDelete: false,
+        createTime: "2025-06-06T00:00:00"
     }
 };
