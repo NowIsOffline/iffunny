@@ -45,7 +45,7 @@ class DataStore {
             }
 
             if (this._icons.length === 0) {
-                this._icons = [1,12];
+                this._icons = [1,7,12];
                 this.saveToLocal();
             }
         }
