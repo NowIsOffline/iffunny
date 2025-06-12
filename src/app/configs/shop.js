@@ -121,5 +121,16 @@ export const SHOP_SITE_CFG = {
         openType: "link",
         stopDelete: false,
         createTime: "2025-06-06T00:00:00"
+    },
+    12:{
+        id:12,
+        iconType:"item",
+        name: "Flingtrainer",
+        desc: "PC Game Cheats and Mods",
+        logo: "https://flingtrainer.com/wp-content/uploads/2019/05/cropped-free-icon-bw_icon-template-psd-3-3-200x200.png",
+        url: "https://flingtrainer.com/",
+        openType: "link",
+        stopDelete: false,
+        createTime: "2025-06-12T00:00:00"
     }
 };
