@@ -139,6 +139,17 @@ export const SHOP_SITE_CFG = {
         name: "Switch Account",
         desc: "Change switch account info include Country or region",
         logo: "https://accounts.nintendo.com/favicon.ico",
+        url: "/tools/hanime1",
+        openType: "link",
+        stopDelete: false,
+        createTime: "2025-06-20T00:00:00"
+    },
+    14:{
+        id:14,
+        iconType:"item",
+        name: "Hanime1",
+        desc: "Watch hentai online free download HD on mobile phone tablet laptop desktop.  Stream online, regularly released uncensored, subbed, in 720p and 1080p!",
+        logo: "/icon/hanime1.png",
         url: "https://accounts.nintendo.com/",
         openType: "link",
         stopDelete: false,
