@@ -132,5 +132,16 @@ export const SHOP_SITE_CFG = {
         openType: "link",
         stopDelete: false,
         createTime: "2025-06-12T00:00:00"
+    },
+    13:{
+        id:13,
+        iconType:"item",
+        name: "Switch Account",
+        desc: "Change switch account info include Country or region",
+        logo: "https://accounts.nintendo.com/favicon.ico",
+        url: "https://accounts.nintendo.com/",
+        openType: "link",
+        stopDelete: false,
+        createTime: "2025-06-20T00:00:00"
     }
 };
